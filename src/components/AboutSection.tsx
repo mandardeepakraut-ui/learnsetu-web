@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { User, Sparkles, Trophy, Users, Building2, Quote, ArrowRight, ShieldCheck } from 'lucide-react';
+import { User, Sparkles, Trophy, Users, Building2 } from 'lucide-react';
 import sagarParmarImg from '../assets/sagar-parmar-founder.png';
 
 export const AboutSection: React.FC = () => {
@@ -107,11 +107,11 @@ export const AboutSection: React.FC = () => {
               </div>
 
               <div className="p-5 rounded-2xl bg-[#FAFAFC] border border-slate-200/80">
-                That realization led me to build <strong className="text-[#0067FF]">Learnsetu.in</strong> — a platform designed not just to teach Data Science and AI, but to empower students with the mindset, communication, and emotional strength needed to thrive in their careers.
+                That realization led me to build <strong className="text-[#0067FF]">Learnsetu</strong> — a platform designed not just to teach Data Science and AI, but to empower students with the mindset, communication, and emotional strength needed to thrive in their careers.
               </div>
 
               <div className="p-5 rounded-2xl bg-[#FAFAFC] border border-slate-200/80">
-                My goal is simple: to make learning real, personal, and transformational. Whether you’re a fresher or a career switcher, <strong className="text-[#0067FF]">Learnsetu.in</strong> is here to guide you with mentorship, hands-on projects, and a community that genuinely cares.
+                My goal is simple: to make learning real, personal, and transformational. Whether you’re a fresher or a career switcher, <strong className="text-[#0067FF]">Learnsetu</strong> is here to guide you with mentorship, hands-on projects, and a community that genuinely cares.
               </div>
             </div>
 
