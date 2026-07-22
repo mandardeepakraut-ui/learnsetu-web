@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { User, ShieldCheck, Sparkles, Award, Target, Rocket, Quote } from 'lucide-react';
+import { User, Sparkles, Trophy, Users, Building2, Quote, ArrowRight, ShieldCheck } from 'lucide-react';
 import sagarParmarImg from '../assets/sagar-parmar-founder.png';
 
 export const AboutSection: React.FC = () => {
@@ -23,20 +23,22 @@ export const AboutSection: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Section Header */}
-        <div className="text-center max-w-3xl mx-auto mb-16">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#0067FF]/10 text-[#0067FF] text-xs font-mono font-bold mb-3">
+        <div className="text-center max-w-3xl mx-auto mb-16 space-y-4">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#0067FF]/10 text-[#0067FF] text-xs font-mono font-bold">
             <User className="w-3.5 h-3.5" />
-            <span>LEADERSHIP & VISION</span>
+            <span>EXPERT GUIDANCE & FOUNDER STORY</span>
           </div>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 tracking-tight">
-            Meet the Founder & Visionary
+          
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 tracking-tight leading-tight font-display">
+            Leading Online Learning Platform for Data Science Mastery
           </h2>
-          <p className="mt-4 text-slate-600 text-base sm:text-lg font-medium">
-            Bridging ambitious students to high-paying tech jobs through 1:1 mentorship and live industry projects.
+          
+          <p className="text-base sm:text-lg text-slate-600 font-medium leading-relaxed">
+            Transform Your Data Science Career and Secure up to <strong className="text-[#0067FF]">70% salary hikes</strong> with Learnsetu's Expert Guidance.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center mb-16">
           
           {/* Left Column: Interactive 3D Motion Founder Portrait */}
           <div className="lg:col-span-5 flex justify-center">
@@ -63,7 +65,7 @@ export const AboutSection: React.FC = () => {
                     onError={(e) => {
                       (e.target as HTMLImageElement).src = '/sagar-parmar-founder.png';
                     }}
-                    alt="Sagar Parmar - Founder & CEO LearnSetu"
+                    alt="Sagar Parmar - Founder & CEO Learnsetu"
                     className="w-full h-auto max-h-[420px] object-contain drop-shadow-xl transition-transform duration-500 group-hover:scale-[1.04]"
                   />
                   
@@ -87,61 +89,75 @@ export const AboutSection: React.FC = () => {
             </div>
           </div>
 
-          {/* Right Column: Mission & Mentorship Story */}
+          {/* Right Column: Exact Founder Story Copy */}
           <div className="lg:col-span-7 space-y-6">
             
-            {/* Quote Block */}
-            <div className="p-6 rounded-3xl bg-[#FAFAFC] border border-slate-200/80 space-y-4 relative">
-              <Quote className="w-8 h-8 text-[#0067FF]/30 absolute top-4 right-4 pointer-events-none" />
-              <h4 className="text-xl font-bold text-slate-900 font-display">
-                "Our mission is simple: Bridging you to your next tech job."
-              </h4>
-              <p className="text-xs text-slate-600 leading-relaxed font-medium">
-                At LearnSetu, we believe real career transformation happens through live weekend mentorship, hands-on Data Science projects, and direct 1:1 guidance. We focus on building true engineering competence so our graduates succeed in top tech companies.
-              </p>
+            <div className="space-y-2">
+              <span className="text-xs font-mono font-bold text-[#0067FF] uppercase tracking-wider">MEET THE FOUNDER</span>
+              <h3 className="text-2xl sm:text-3xl font-extrabold text-slate-900 font-display">
+                Hi, I'm Sagar Parmar
+              </h3>
+              <p className="text-xs font-mono text-slate-500 font-bold">FOUNDER & CEO OF LEARNSETU</p>
             </div>
 
-            {/* Core Pillars */}
-            <div className="space-y-4">
-              <div className="flex items-start gap-4 p-5 rounded-2xl bg-white border border-slate-200 shadow-sm hover:border-[#0067FF]/40 transition-all hover:shadow-md">
-                <div className="w-10 h-10 rounded-xl bg-[#0067FF]/10 text-[#0067FF] flex items-center justify-center shrink-0 font-bold">
-                  <Target className="w-5 h-5" />
-                </div>
-                <div>
-                  <h4 className="text-base font-bold text-slate-900">Job-Ready AI & Data Science Curriculum</h4>
-                  <p className="text-xs text-slate-600 mt-1 leading-relaxed font-medium">
-                    Learn Python, Machine Learning, SQL, and Power BI through 24 weeks of structured live sessions and real-world project portfolios.
-                  </p>
-                </div>
+            {/* Verbatim Founder Bio Paragraphs */}
+            <div className="space-y-4 text-xs sm:text-sm text-slate-700 leading-relaxed font-medium">
+              <div className="p-5 rounded-2xl bg-[#FAFAFC] border border-slate-200/80">
+                With a degree in Information Technology from Mumbai University and over 4 years of hands-on experience helping startups grow, I’ve seen the challenges fresh graduates face when trying to break into the tech industry — not because they lack talent, but because they lack direction, practical skills, and confidence.
               </div>
 
-              <div className="flex items-start gap-4 p-5 rounded-2xl bg-white border border-slate-200 shadow-sm hover:border-[#0067FF]/40 transition-all hover:shadow-md">
-                <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 font-bold">
-                  <ShieldCheck className="w-5 h-5" />
-                </div>
-                <div>
-                  <h4 className="text-base font-bold text-slate-900">100% Placement Guarantee Commitment</h4>
-                  <p className="text-xs text-slate-600 mt-1 leading-relaxed font-medium">
-                    1:1 video doubt solving, resume review, GitHub portfolio alignment, and mock interviews until you secure your tech offer.
-                  </p>
-                </div>
+              <div className="p-5 rounded-2xl bg-[#FAFAFC] border border-slate-200/80">
+                That realization led me to build <strong className="text-[#0067FF]">Learnsetu.in</strong> — a platform designed not just to teach Data Science and AI, but to empower students with the mindset, communication, and emotional strength needed to thrive in their careers.
               </div>
 
-              <div className="flex items-start gap-4 p-5 rounded-2xl bg-white border border-slate-200 shadow-sm hover:border-[#0067FF]/40 transition-all hover:shadow-md">
-                <div className="w-10 h-10 rounded-xl bg-indigo-50 text-[#4F46E5] flex items-center justify-center shrink-0 font-bold">
-                  <Rocket className="w-5 h-5" />
-                </div>
-                <div>
-                  <h4 className="text-base font-bold text-slate-900">Affordable Investment (₹14,999 Full Fee)</h4>
-                  <p className="text-xs text-slate-600 mt-1 leading-relaxed font-medium">
-                    Complete 24-week roadmap available with 12-month No-Cost EMI options starting at just ₹1,250/month.
-                  </p>
-                </div>
+              <div className="p-5 rounded-2xl bg-[#FAFAFC] border border-slate-200/80">
+                My goal is simple: to make learning real, personal, and transformational. Whether you’re a fresher or a career switcher, <strong className="text-[#0067FF]">Learnsetu.in</strong> is here to guide you with mentorship, hands-on projects, and a community that genuinely cares.
               </div>
             </div>
 
           </div>
 
+        </div>
+
+        {/* Number Speaks Section (Interactive Metrics Cards) */}
+        <div className="pt-12 border-t border-slate-200/80">
+          <div className="text-center mb-10">
+            <h3 className="text-2xl font-extrabold text-slate-900 tracking-tight font-display">
+              Number Speaks
+            </h3>
+            <p className="text-xs text-slate-500 font-mono mt-1 font-bold">PROVEN IMPACT & ACADEMY METRICS</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            
+            {/* Metric 1: 5+ Awards */}
+            <div className="p-6 rounded-3xl bg-[#FAFAFC] border border-slate-200 text-center space-y-2 hover:border-[#0067FF] hover:shadow-xl hover:shadow-[#0067FF]/10 transition-all group">
+              <div className="w-12 h-12 rounded-2xl bg-[#0067FF]/10 text-[#0067FF] flex items-center justify-center mx-auto group-hover:scale-110 transition-transform">
+                <Trophy className="w-6 h-6" />
+              </div>
+              <div className="text-4xl font-extrabold font-mono text-slate-900">5+</div>
+              <div className="text-xs font-mono font-bold text-slate-500 uppercase tracking-wider">Awards</div>
+            </div>
+
+            {/* Metric 2: 25+ Partners */}
+            <div className="p-6 rounded-3xl bg-[#FAFAFC] border border-slate-200 text-center space-y-2 hover:border-[#0067FF] hover:shadow-xl hover:shadow-[#0067FF]/10 transition-all group">
+              <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-[#4F46E5] flex items-center justify-center mx-auto group-hover:scale-110 transition-transform">
+                <Building2 className="w-6 h-6" />
+              </div>
+              <div className="text-4xl font-extrabold font-mono text-slate-900">25+</div>
+              <div className="text-xs font-mono font-bold text-slate-500 uppercase tracking-wider">Partners</div>
+            </div>
+
+            {/* Metric 3: 500+ Students */}
+            <div className="p-6 rounded-3xl bg-[#FAFAFC] border border-slate-200 text-center space-y-2 hover:border-[#0067FF] hover:shadow-xl hover:shadow-[#0067FF]/10 transition-all group">
+              <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto group-hover:scale-110 transition-transform">
+                <Users className="w-6 h-6" />
+              </div>
+              <div className="text-4xl font-extrabold font-mono text-slate-900">500+</div>
+              <div className="text-xs font-mono font-bold text-slate-500 uppercase tracking-wider">Students</div>
+            </div>
+
+          </div>
         </div>
 
       </div>
