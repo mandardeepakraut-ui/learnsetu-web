@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { User, ShieldCheck, Sparkles, Award, Target, Rocket, Linkedin, Quote } from 'lucide-react';
+import { User, ShieldCheck, Sparkles, Award, Target, Rocket, Quote } from 'lucide-react';
+import sagarParmarImg from '../assets/sagar-parmar-founder.png';
 
 export const AboutSection: React.FC = () => {
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
@@ -56,9 +57,12 @@ export const AboutSection: React.FC = () => {
               <div className="relative rounded-3xl bg-white border-2 border-slate-200 p-4 shadow-2xl shadow-slate-200/80 overflow-hidden">
                 
                 {/* Founder Interactive Portrait */}
-                <div className="relative overflow-hidden rounded-2xl bg-gradient-to-b from-[#FAFAFC] to-slate-100 flex items-center justify-center p-2">
+                <div className="relative overflow-hidden rounded-2xl bg-gradient-to-b from-[#FAFAFC] to-slate-100 flex items-center justify-center p-2 min-h-[380px]">
                   <img
-                    src="/sagar-parmar-founder.png"
+                    src={sagarParmarImg}
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = '/sagar-parmar-founder.png';
+                    }}
                     alt="Sagar Parmar - Founder & CEO LearnSetu"
                     className="w-full h-auto max-h-[420px] object-contain drop-shadow-xl transition-transform duration-500 group-hover:scale-[1.04]"
                   />
