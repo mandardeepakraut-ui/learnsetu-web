@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Navbar } from './components/Navbar';
 import { Hero } from './components/Hero';
 import { HiringPartners } from './components/HiringPartners';
+import { AboutSection } from './components/AboutSection';
 import { CourseShowcase } from './components/CourseShowcase';
 import { InteractiveCalculator3D } from './components/InteractiveCalculator3D';
 import { TechStack3D } from './components/TechStack3D';
@@ -33,7 +34,10 @@ export const App: React.FC = () => {
           onOpenBrochure={() => setBrochureOpen(true)}
           onSelectCourse={scrollToCourse}
         />
+        
         <HiringPartners />
+
+        <AboutSection />
 
         <div id="estimator">
           <InteractiveCalculator3D onOpenBrochure={() => setBrochureOpen(true)} />
