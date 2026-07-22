@@ -8,9 +8,9 @@ export const CertificatePreview3D: React.FC = () => {
   return (
     <section className="py-20 bg-[#FAFAFC] border-t border-slate-200/80">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        
+
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-          
+
           {/* Left Info */}
           <div className="lg:col-span-5 space-y-6">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#0067FF]/10 text-[#0067FF] text-xs font-mono">
@@ -21,7 +21,7 @@ export const CertificatePreview3D: React.FC = () => {
             <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
               Industry-Recognized AI & Data Science Certificate
             </h2>
-            
+
             <p className="text-sm text-slate-600 leading-relaxed">
               Earn a shareable, verified certificate upon completing the 24-week Master Program and real-world portfolio projects. Share directly on LinkedIn to showcase your verified credentials to hiring managers.
             </p>
@@ -44,7 +44,7 @@ export const CertificatePreview3D: React.FC = () => {
           {/* Right 3D Perspective Certificate Preview */}
           <div className="lg:col-span-7">
             <div className="p-8 sm:p-12 rounded-3xl bg-white border-2 border-slate-200 shadow-2xl shadow-slate-200/80 space-y-8 relative overflow-hidden transform lg:rotate-1 hover:rotate-0 transition-transform duration-500">
-              
+
               {/* Decorative Certificate Watermark */}
               <div className="absolute top-4 right-4 opacity-10 pointer-events-none">
                 <Award className="w-48 h-48 text-[#0067FF]" />

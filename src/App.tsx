@@ -45,9 +45,9 @@ export const App: React.FC = () => {
         />
 
         <TechStack3D />
-        
+
         <MentorshipGrid />
-        
+
         <CourseMatcherQuiz
           onOpenBrochure={() => setBrochureOpen(true)}
           onSelectCourse={scrollToCourse}
