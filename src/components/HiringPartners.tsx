@@ -111,8 +111,8 @@ export const HiringPartners: React.FC = () => {
                     onError={(e) => {
                       (e.target as HTMLImageElement).src = company.fallbackSrc;
                     }}
-                    alt={`${company.name} Logo`}
-                    className="max-h-10 max-w-full object-contain filter contrast-125 transition-all"
+                    alt={`${company.name} Official Logo`}
+                    className="max-h-11 max-w-full object-contain filter contrast-110 transition-all"
                   />
                 </div>
 
