@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Settings, Phone, DollarSign, User, ShieldCheck, Download, Save, LogOut, RefreshCw, Check, Sparkles, FileSpreadsheet, Megaphone, Clock, HelpCircle, Star, MessageCircle, Plus, Trash2, Edit3, Award, Lock, Building2, Video, KeyRound, Activity, Monitor, Smartphone, Globe, Eye } from 'lucide-react';
+import { Settings, Phone, DollarSign, User, ShieldCheck, Download, Save, LogOut, RefreshCw, Check, Sparkles, FileSpreadsheet, Megaphone, Clock, HelpCircle, Star, MessageCircle, Plus, Trash2, Edit3, Award, Lock, Building2, Video, KeyRound, Activity, Monitor, Smartphone, Globe, Eye, UserCheck, ShieldAlert, Users, UserPlus } from 'lucide-react';
 import { useSettings } from '../context/SettingsContext';
-import { supabase, BrochureLead, SiteVisit } from '../lib/supabase';
+import { supabase, BrochureLead, SiteVisit, AdminAuditLog, logAuditActivity, AdminUser, AdminPermission, ALL_PERMISSIONS, DEFAULT_ADMIN_USERS, fetchAdminUsers, createAdminUser, updateAdminUserPermissions, deleteAdminUser } from '../lib/supabase';
 import { LearnSetuLogo } from '../components/LearnSetuLogo';
 import { OnlineVisitorState } from '../hooks/useRealtimePresence';
 
@@ -9,6 +9,7 @@ interface AdminDashboardProps {
   onLogout: () => void;
   onlineUsers?: OnlineVisitorState[];
   onlineCount?: number;
+  currentAdmin?: AdminUser;
 }
 
 interface FaqItem {
@@ -34,9 +35,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   onLogout,
   onlineUsers = [],
   onlineCount = 1,
+  currentAdmin = DEFAULT_ADMIN_USERS[0],
 }) => {
   const { settings, updateSettings } = useSettings();
-  const [activeTab, setActiveTab] = useState<'pricing' | 'urgency' | 'announcement' | 'popup' | 'partners' | 'faqs' | 'testimonials' | 'contact' | 'founder' | 'security' | 'leads' | 'traffic'>('traffic');
+  const [activeTab, setActiveTab] = useState<'pricing' | 'urgency' | 'announcement' | 'popup' | 'partners' | 'faqs' | 'testimonials' | 'contact' | 'founder' | 'security' | 'leads' | 'traffic' | 'audit' | 'admins'>('traffic');
   const [formData, setFormData] = useState(settings);
   const [leads, setLeads] = useState<BrochureLead[]>([]);
   const [savedSuccess, setSavedSuccess] = useState(false);
@@ -47,6 +49,138 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const [dbVisits, setDbVisits] = useState<SiteVisit[]>([]);
   const [loadingVisits, setLoadingVisits] = useState(false);
   const [visitSearch, setVisitSearch] = useState('');
+
+  // Audit Logs State
+  const [auditLogs, setAuditLogs] = useState<AdminAuditLog[]>([]);
+  const [loadingAudit, setLoadingAudit] = useState(false);
+  const [mentorFilter, setMentorFilter] = useState('all');
+
+  // Admin Users & Permission Management State
+  const [adminList, setAdminList] = useState<AdminUser[]>(DEFAULT_ADMIN_USERS);
+  const [loadingAdmins, setLoadingAdmins] = useState(false);
+  const [newAdminName, setNewAdminName] = useState('');
+  const [newAdminUsername, setNewAdminUsername] = useState('');
+  const [newAdminRole, setNewAdminRole] = useState('Mentor & Counselor');
+  const [newAdminPasscode, setNewAdminPasscode] = useState('');
+  const [newAdminPermissions, setNewAdminPermissions] = useState<AdminPermission[]>(['pricing', 'leads', 'traffic', 'content']);
+  const [userMsg, setUserMsg] = useState('');
+
+  const loadAdminUsersList = async () => {
+    setLoadingAdmins(true);
+    const users = await fetchAdminUsers();
+    setAdminList(users);
+    setLoadingAdmins(false);
+  };
+
+  useEffect(() => {
+    if (activeTab === 'admins') {
+      loadAdminUsersList();
+    }
+  }, [activeTab]);
+
+  const handleCreateNewAdmin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newAdminUsername.trim() || !newAdminPasscode.trim()) return;
+
+    const newAdminObj: Omit<AdminUser, 'id' | 'created_at'> = {
+      name: newAdminName.trim() || newAdminUsername.trim(),
+      username: newAdminUsername.trim().toLowerCase(),
+      role: newAdminRole.trim() || 'Admin Mentor',
+      passcode: newAdminPasscode.trim(),
+      permissions: newAdminPermissions,
+      is_active: true,
+    };
+
+    const success = await createAdminUser(newAdminObj);
+    if (success) {
+      logAuditActivity(
+        currentAdmin.name,
+        currentAdmin.role,
+        'CREATE_ADMIN',
+        `Created new admin account for ${newAdminObj.name} (@${newAdminObj.username})`
+      );
+      setUserMsg(`Successfully created new admin account for @${newAdminObj.username}!`);
+      setNewAdminName('');
+      setNewAdminUsername('');
+      setNewAdminPasscode('');
+      loadAdminUsersList();
+      setTimeout(() => setUserMsg(''), 4000);
+    } else {
+      setUserMsg('Error: Username already exists or database insertion failed.');
+    }
+  };
+
+  const handleTogglePermission = async (username: string, perm: AdminPermission) => {
+    const targetUser = adminList.find((u) => u.username === username);
+    if (!targetUser) return;
+
+    let updatedPerms: AdminPermission[];
+    if (targetUser.permissions.includes(perm)) {
+      updatedPerms = targetUser.permissions.filter((p) => p !== perm);
+    } else {
+      updatedPerms = [...targetUser.permissions, perm];
+    }
+
+    // Optimistic UI update
+    setAdminList((prev) =>
+      prev.map((u) => (u.username === username ? { ...u, permissions: updatedPerms } : u))
+    );
+
+    const ok = await updateAdminUserPermissions(username, updatedPerms);
+    if (ok) {
+      logAuditActivity(
+        currentAdmin.name,
+        currentAdmin.role,
+        'UPDATE_PERMISSIONS',
+        `Updated permissions for @${username}: [${updatedPerms.join(', ')}]`
+      );
+    }
+  };
+
+  const handleDeleteAdminAccount = async (username: string) => {
+    if (username === 'mandar' || username === currentAdmin.username) {
+      alert("Cannot delete primary founder or currently logged-in account!");
+      return;
+    }
+
+    if (confirm(`Are you sure you want to delete admin account @${username}?`)) {
+      const ok = await deleteAdminUser(username);
+      if (ok) {
+        logAuditActivity(
+          currentAdmin.name,
+          currentAdmin.role,
+          'DELETE_ADMIN',
+          `Deleted admin account @${username}`
+        );
+        loadAdminUsersList();
+      }
+    }
+  };
+
+  const fetchAuditLogs = async () => {
+    setLoadingAudit(true);
+    try {
+      const { data, error } = await supabase
+        .from('admin_audit_logs')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(100);
+
+      if (!error && data) {
+        setAuditLogs(data as AdminAuditLog[]);
+      }
+    } catch (err) {
+      console.warn('Error fetching audit logs:', err);
+    } finally {
+      setLoadingAudit(false);
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab === 'audit') {
+      fetchAuditLogs();
+    }
+  }, [activeTab]);
 
   const fetchVisitHistory = async () => {
     setLoadingVisits(true);
@@ -165,6 +299,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     const success = await updateSettings(toSave);
     setIsSaving(false);
     if (success) {
+      logAuditActivity(currentAdmin.name, currentAdmin.role, 'UPDATE_SETTINGS', 'Saved site settings, pricing & content changes');
       setSavedSuccess(true);
       setTimeout(() => setSavedSuccess(false), 3000);
     }
@@ -172,6 +307,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
   const exportLeadsToCSV = () => {
     if (leads.length === 0) return;
+    logAuditActivity(currentAdmin.name, currentAdmin.role, 'EXPORT_LEADS', `Exported ${leads.length} student leads to CSV`);
     const headers = ['First Name', 'Last Name', 'Email', 'Phone', 'Program', 'Date'];
     const rows = leads.map(l => [
       l.first_name,
@@ -244,19 +380,27 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         <div className="flex items-center gap-4">
           <LearnSetuLogo showTagline={false} size="sm" />
           <div className="h-6 w-px bg-slate-200" />
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-mono font-bold">
-            <span className="w-2 h-2 rounded-full bg-emerald-600 animate-pulse" />
-            <span>REAL-TIME MULTI-TAB SYNC ACTIVE</span>
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#0067FF]/10 text-[#0067FF] border border-[#0067FF]/20 text-xs font-mono font-bold">
+            <UserCheck className="w-3.5 h-3.5" />
+            <span>{currentAdmin.name}</span>
+            <span className="text-[10px] text-slate-500 font-normal">(@{currentAdmin.username})</span>
           </div>
         </div>
 
-        <button
-          onClick={onLogout}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-all border border-slate-200"
-        >
-          <LogOut className="w-4 h-4" />
-          <span>Exit Admin</span>
-        </button>
+        <div className="flex items-center gap-3">
+          <div className="hidden md:flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-mono font-bold">
+            <span className="w-2 h-2 rounded-full bg-emerald-600 animate-pulse" />
+            <span>SYNC ACTIVE</span>
+          </div>
+
+          <button
+            onClick={onLogout}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-all border border-slate-200"
+          >
+            <LogOut className="w-4 h-4" />
+            <span>Exit Admin</span>
+          </button>
+        </div>
       </header>
 
       {/* Main Admin Container */}
@@ -285,6 +429,30 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           >
             <Activity className="w-4 h-4 text-emerald-500 animate-pulse" />
             <span>Live Traffic & Watchers ({onlineCount})</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('audit')}
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold transition-all ${
+              activeTab === 'audit'
+                ? 'bg-purple-600 text-white shadow-lg shadow-purple-600/20'
+                : 'bg-purple-50 text-purple-700 border border-purple-200 hover:bg-purple-100'
+            }`}
+          >
+            <ShieldCheck className="w-4 h-4 text-purple-500" />
+            <span>Audit Activity Logs</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('admins')}
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold transition-all ${
+              activeTab === 'admins'
+                ? 'bg-cyan-600 text-white shadow-lg shadow-cyan-600/20'
+                : 'bg-cyan-50 text-cyan-700 border border-cyan-200 hover:bg-cyan-100'
+            }`}
+          >
+            <Users className="w-4 h-4 text-cyan-600" />
+            <span>Admin Users & Permissions ({adminList.length})</span>
           </button>
 
           <button
@@ -624,6 +792,312 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 )}
               </div>
             )}
+          </div>
+        )}
+
+        {/* Tab 0.5: Multi-Admin Audit Activity Logs */}
+        {activeTab === 'audit' && (
+          <div className="p-8 rounded-3xl bg-white border border-slate-200 shadow-xl space-y-6">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-200 pb-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-xl bg-purple-50 border border-purple-200 text-purple-600">
+                  <ShieldCheck className="w-6 h-6" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-extrabold text-slate-900 flex items-center gap-2">
+                    Multi-Admin Audit Activity Logs
+                    <span className="text-xs font-mono font-bold px-2 py-0.5 rounded bg-purple-100 text-purple-700">
+                      SECURE AUDIT TRAIL
+                    </span>
+                  </h3>
+                  <p className="text-xs text-slate-500 font-medium">
+                    Trace actions taken by mentors (Mandar Raut, Sagar Parmar, Manthan Saindane) across site settings, pricing, and leads.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <select
+                  value={mentorFilter}
+                  onChange={(e) => setMentorFilter(e.target.value)}
+                  className="px-3 py-2 text-xs font-bold bg-slate-50 border border-slate-200 rounded-xl text-slate-700 focus:outline-none focus:border-purple-600"
+                >
+                  <option value="all">All Mentors Audit Stream</option>
+                  <option value="Mandar Raut">Mandar Raut</option>
+                  <option value="Sagar Parmar">Sagar Parmar</option>
+                  <option value="Manthan Saindane">Manthan Saindane</option>
+                </select>
+
+                <button
+                  onClick={fetchAuditLogs}
+                  disabled={loadingAudit}
+                  className="flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold text-white bg-purple-600 hover:bg-purple-700 rounded-xl transition-colors disabled:opacity-50"
+                >
+                  <RefreshCw className={`w-3.5 h-3.5 ${loadingAudit ? 'animate-spin' : ''}`} />
+                  Refresh
+                </button>
+              </div>
+            </div>
+
+            {/* Audit Log Table */}
+            {loadingAudit ? (
+              <div className="py-12 text-center text-slate-500">
+                <RefreshCw className="w-6 h-6 mx-auto mb-2 animate-spin text-purple-600" />
+                <p className="text-xs font-bold">Fetching latest admin activity logs...</p>
+              </div>
+            ) : auditLogs.length === 0 ? (
+              <div className="py-12 text-center text-slate-400 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+                <ShieldCheck className="w-8 h-8 mx-auto mb-2 opacity-50 text-purple-500" />
+                <p className="text-sm font-bold text-slate-600">No activity logs recorded yet.</p>
+                <p className="text-xs text-slate-500 mt-1">Actions like updating settings, pricing, or exporting leads will automatically log here.</p>
+              </div>
+            ) : (
+              <div className="overflow-x-auto rounded-2xl border border-slate-200">
+                <table className="w-full text-left text-xs text-slate-700">
+                  <thead className="bg-slate-50 text-slate-600 border-b border-slate-200 uppercase font-mono text-[11px]">
+                    <tr>
+                      <th className="px-4 py-3 font-bold">Timestamp</th>
+                      <th className="px-4 py-3 font-bold">Admin Mentor</th>
+                      <th className="px-4 py-3 font-bold">Role</th>
+                      <th className="px-4 py-3 font-bold">Action Type</th>
+                      <th className="px-4 py-3 font-bold">Activity Details</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 bg-white font-medium">
+                    {auditLogs
+                      .filter((log) => mentorFilter === 'all' || log.mentor_name === mentorFilter)
+                      .map((log) => (
+                        <tr key={log.id || Math.random()} className="hover:bg-slate-50/80">
+                          <td className="px-4 py-3 text-slate-400 font-mono whitespace-nowrap">
+                            {log.created_at ? new Date(log.created_at).toLocaleString() : 'Just now'}
+                          </td>
+                          <td className="px-4 py-3 font-bold text-slate-900 flex items-center gap-1.5">
+                            <span className="w-2 h-2 rounded-full bg-purple-500"></span>
+                            {log.mentor_name}
+                          </td>
+                          <td className="px-4 py-3 text-slate-500 text-[11px] font-mono">{log.mentor_role}</td>
+                          <td className="px-4 py-3">
+                            <span className="px-2 py-0.5 rounded font-mono text-[10px] font-bold bg-purple-100 text-purple-800 border border-purple-200">
+                              {log.action_type}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3 text-slate-700 font-medium">{log.details}</td>
+                        </tr>
+                      ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Tab 0.6: Admin User Management & Permission Control */}
+        {activeTab === 'admins' && (
+          <div className="space-y-8">
+            {/* Create New Admin User Box */}
+            <div className="p-8 rounded-3xl bg-white border border-slate-200 shadow-xl space-y-6">
+              <div className="flex items-center gap-3 border-b border-slate-200 pb-4">
+                <div className="p-2.5 rounded-xl bg-cyan-50 border border-cyan-200 text-cyan-600">
+                  <UserPlus className="w-6 h-6" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-extrabold text-slate-900 flex items-center gap-2">
+                    Create New Admin Account
+                    <span className="text-xs font-mono font-bold px-2 py-0.5 rounded bg-cyan-100 text-cyan-800">
+                      MULTI-ADMIN MANAGEMENT
+                    </span>
+                  </h3>
+                  <p className="text-xs text-slate-500 font-medium">
+                    Add new admin credentials (username & password) and assign granular module permissions.
+                  </p>
+                </div>
+              </div>
+
+              {userMsg && (
+                <div className="p-3.5 rounded-xl bg-cyan-50 border border-cyan-200 text-cyan-800 text-xs font-bold animate-fadeIn">
+                  {userMsg}
+                </div>
+              )}
+
+              <form onSubmit={handleCreateNewAdmin} className="space-y-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">Full Name</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="e.g. Aniket Sharma"
+                      value={newAdminName}
+                      onChange={(e) => setNewAdminName(e.target.value)}
+                      className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-xs font-bold text-slate-900 focus:outline-none focus:border-cyan-600"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">Username (For Login)</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="e.g. aniket"
+                      value={newAdminUsername}
+                      onChange={(e) => setNewAdminUsername(e.target.value)}
+                      className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-xs font-bold text-slate-900 focus:outline-none focus:border-cyan-600"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">Role / Title</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Lead Mentor / Sales Specialist"
+                      value={newAdminRole}
+                      onChange={(e) => setNewAdminRole(e.target.value)}
+                      className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-xs font-bold text-slate-900 focus:outline-none focus:border-cyan-600"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">Password / Passcode</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="Assign password (e.g. aniket123)"
+                      value={newAdminPasscode}
+                      onChange={(e) => setNewAdminPasscode(e.target.value)}
+                      className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-xs font-bold text-slate-900 focus:outline-none focus:border-cyan-600"
+                    />
+                  </div>
+                </div>
+
+                {/* Permissions Checkbox Grid */}
+                <div className="space-y-2 pt-2 border-t border-slate-100">
+                  <label className="block text-xs font-bold text-slate-700">Granted Module Permissions</label>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                    {ALL_PERMISSIONS.map((perm) => {
+                      const isChecked = newAdminPermissions.includes(perm.key);
+                      return (
+                        <label
+                          key={perm.key}
+                          className={`p-3 rounded-xl border flex items-start gap-2.5 cursor-pointer transition-all ${
+                            isChecked
+                              ? 'border-cyan-600 bg-cyan-50/50 text-slate-900 font-bold'
+                              : 'border-slate-200 bg-slate-50 text-slate-500'
+                          }`}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={isChecked}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setNewAdminPermissions([...newAdminPermissions, perm.key]);
+                              } else {
+                                setNewAdminPermissions(newAdminPermissions.filter((p) => p !== perm.key));
+                              }
+                            }}
+                            className="mt-0.5 rounded text-cyan-600 focus:ring-cyan-500"
+                          />
+                          <div>
+                            <div className="text-xs font-bold">{perm.label}</div>
+                            <div className="text-[10px] text-slate-500 font-normal">{perm.description}</div>
+                          </div>
+                        </label>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  className="px-6 py-3 rounded-xl bg-cyan-600 hover:bg-cyan-700 text-white text-xs font-bold flex items-center gap-2 transition-all shadow-md shadow-cyan-600/20 active:scale-95"
+                >
+                  <UserPlus className="w-4 h-4" />
+                  <span>Create Admin User Account</span>
+                </button>
+              </form>
+            </div>
+
+            {/* Existing Admin Accounts Table & Permission Manager */}
+            <div className="p-8 rounded-3xl bg-white border border-slate-200 shadow-xl space-y-6">
+              <div className="flex items-center justify-between border-b border-slate-200 pb-4">
+                <div className="flex items-center gap-2">
+                  <Users className="w-5 h-5 text-cyan-600" />
+                  <h4 className="text-lg font-extrabold text-slate-900">
+                    Existing Registered Admins ({adminList.length})
+                  </h4>
+                </div>
+                <button
+                  onClick={loadAdminUsersList}
+                  disabled={loadingAdmins}
+                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors"
+                >
+                  <RefreshCw className={`w-3.5 h-3.5 ${loadingAdmins ? 'animate-spin' : ''}`} />
+                  Refresh List
+                </button>
+              </div>
+
+              <div className="overflow-x-auto rounded-2xl border border-slate-200">
+                <table className="w-full text-left text-xs text-slate-700">
+                  <thead className="bg-slate-50 text-slate-600 border-b border-slate-200 uppercase font-mono text-[11px]">
+                    <tr>
+                      <th className="px-4 py-3 font-bold">Admin Name & Username</th>
+                      <th className="px-4 py-3 font-bold">Role</th>
+                      <th className="px-4 py-3 font-bold">Password / PIN</th>
+                      <th className="px-4 py-3 font-bold">Active Module Permissions</th>
+                      <th className="px-4 py-3 font-bold text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 bg-white font-medium">
+                    {adminList.map((user) => (
+                      <tr key={user.username} className="hover:bg-slate-50/60">
+                        <td className="px-4 py-3">
+                          <div className="font-bold text-slate-900">{user.name}</div>
+                          <div className="text-[11px] font-mono text-cyan-600 font-semibold">@{user.username}</div>
+                        </td>
+                        <td className="px-4 py-3 text-slate-600 font-medium">{user.role}</td>
+                        <td className="px-4 py-3 font-mono text-slate-500 font-bold">
+                          {user.passcode}
+                        </td>
+                        <td className="px-4 py-3">
+                          <div className="flex flex-wrap gap-1">
+                            {ALL_PERMISSIONS.map((p) => {
+                              const hasPerm = user.permissions?.includes(p.key);
+                              return (
+                                <button
+                                  key={p.key}
+                                  type="button"
+                                  onClick={() => handleTogglePermission(user.username, p.key)}
+                                  title={`Click to ${hasPerm ? 'revoke' : 'grant'} ${p.label} permission`}
+                                  className={`px-2 py-0.5 rounded font-mono text-[10px] font-bold border transition-all ${
+                                    hasPerm
+                                      ? 'bg-cyan-100 text-cyan-800 border-cyan-300 hover:bg-cyan-200'
+                                      : 'bg-slate-100 text-slate-400 border-slate-200 hover:bg-slate-200'
+                                  }`}
+                                >
+                                  {hasPerm ? '✓ ' : '+ '}{p.label}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </td>
+                        <td className="px-4 py-3 text-right">
+                          {user.username !== 'mandar' && user.username !== currentAdmin.username ? (
+                            <button
+                              onClick={() => handleDeleteAdminAccount(user.username)}
+                              className="p-1.5 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
+                              title="Delete Admin Account"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          ) : (
+                            <span className="text-[10px] font-mono text-slate-400">Protected</span>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </div>
         )}
 

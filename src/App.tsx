@@ -22,12 +22,15 @@ import { AdminDashboard } from './admin/AdminDashboard';
 import { useRealtimePresence } from './hooks/useRealtimePresence';
 import { AdminVisitorDashboard } from './components/AdminVisitorDashboard';
 
+import { AdminUser, DEFAULT_ADMIN_USERS } from './lib/supabase';
+
 const MainSiteContent: React.FC = () => {
   const [brochureOpen, setBrochureOpen] = useState(false);
   const [isAdminView, setIsAdminView] = useState<boolean>(() => {
     return window.location.hash === '#admin' || window.location.pathname === '/admin';
   });
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
+  const [currentAdmin, setCurrentAdmin] = useState<AdminUser>(DEFAULT_ADMIN_USERS[0]);
   const [isVisitorDashboardOpen, setIsVisitorDashboardOpen] = useState(false);
 
   // Initialize Real-time Presence tracking
@@ -67,7 +70,14 @@ const MainSiteContent: React.FC = () => {
 
   if (isAdminView) {
     if (!isAdminAuthenticated) {
-      return <AdminLogin onLoginSuccess={() => setIsAdminAuthenticated(true)} />;
+      return (
+        <AdminLogin
+          onLoginSuccess={(adminUser) => {
+            setCurrentAdmin(adminUser);
+            setIsAdminAuthenticated(true);
+          }}
+        />
+      );
     }
     return (
       <AdminDashboard
@@ -78,6 +88,7 @@ const MainSiteContent: React.FC = () => {
         }}
         onlineUsers={onlineUsers}
         onlineCount={onlineCount}
+        currentAdmin={currentAdmin}
       />
     );
   }

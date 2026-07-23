@@ -62,6 +62,51 @@ CREATE POLICY "Public Insert Visits" ON public.site_visits FOR INSERT WITH CHECK
 CREATE POLICY "Public Update Visits" ON public.site_visits FOR UPDATE USING (true);
 CREATE POLICY "Public Read Visits" ON public.site_visits FOR SELECT USING (true);
 
+-- 4. Create Admin Audit Logs Table (For Multi-Admin Activity Tracking)
+CREATE TABLE IF NOT EXISTS public.admin_audit_logs (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  mentor_name TEXT NOT NULL,
+  mentor_role TEXT DEFAULT 'Admin Mentor',
+  action_type TEXT NOT NULL,
+  details TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now())
+);
+
+-- Enable RLS and public access policies for admin_audit_logs
+ALTER TABLE public.admin_audit_logs ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Public Insert Audit Logs" ON public.admin_audit_logs FOR INSERT WITH CHECK (true);
+CREATE POLICY "Public Read Audit Logs" ON public.admin_audit_logs FOR SELECT USING (true);
+
+-- 5. Create Admin Users Table (For Multi-Admin Management & Permission Control)
+CREATE TABLE IF NOT EXISTS public.admin_users (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  username TEXT UNIQUE NOT NULL,
+  name TEXT NOT NULL,
+  role TEXT DEFAULT 'Admin Mentor',
+  passcode TEXT NOT NULL,
+  permissions TEXT[] DEFAULT ARRAY['pricing', 'leads', 'traffic', 'content', 'admins'],
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now())
+);
+
+-- Enable RLS & public access policies for admin_users
+ALTER TABLE public.admin_users ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Public Select Admins" ON public.admin_users FOR SELECT USING (true);
+CREATE POLICY "Public Insert Admins" ON public.admin_users FOR INSERT WITH CHECK (true);
+CREATE POLICY "Public Update Admins" ON public.admin_users FOR UPDATE USING (true);
+CREATE POLICY "Public Delete Admins" ON public.admin_users FOR DELETE USING (true);
+
+-- Seed Default Admin Accounts
+INSERT INTO public.admin_users (username, name, role, passcode, permissions) VALUES
+  ('mandar', 'Mandar Raut', 'Founder & Lead Mentor', 'mandar123', ARRAY['pricing', 'leads', 'traffic', 'content', 'admins']),
+  ('sagar', 'Sagar Parmar', 'Founder & CEO', 'sagar123', ARRAY['pricing', 'leads', 'traffic', 'content', 'admins']),
+  ('manthan', 'Manthan Saindane', 'Co-Founder & AI Mentor', 'manthan123', ARRAY['pricing', 'leads', 'traffic', 'content', 'admins'])
+ON CONFLICT (username) DO NOTHING;
+
+
+
 -- Enable Supabase Realtime publication on site_visits table (optional if listening to DB changes)
 -- ALTER PUBLICATION supabase_realtime ADD TABLE public.site_visits;
 
