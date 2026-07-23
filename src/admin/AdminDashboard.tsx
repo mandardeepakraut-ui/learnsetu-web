@@ -166,9 +166,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
         <div className="flex items-center gap-4">
           <LearnSetuLogo showTagline={false} size="sm" />
           <div className="h-6 w-px bg-slate-200" />
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#0067FF]/10 text-[#0067FF] text-xs font-mono font-bold">
-            <ShieldCheck className="w-3.5 h-3.5" />
-            <span>REAL-TIME ADMIN DASHBOARD</span>
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-mono font-bold">
+            <span className="w-2 h-2 rounded-full bg-emerald-600 animate-pulse" />
+            <span>REAL-TIME MULTI-TAB SYNC ACTIVE</span>
           </div>
         </div>
 

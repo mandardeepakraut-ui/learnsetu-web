@@ -138,6 +138,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   useEffect(() => {
     fetchSettings();
 
+    // 1. Supabase Postgres Real-Time Channel
     const channel = supabase
       .channel('public:site_settings')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'site_settings' }, (payload) => {
@@ -149,31 +150,45 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       })
       .subscribe();
 
+    // 2. Multi-Tab Local Storage Cross-Sync Event Listener
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'ls_site_settings' && e.newValue) {
+        try {
+          const parsed = JSON.parse(e.newValue);
+          setSettings((prev) => ({ ...prev, ...parsed }));
+        } catch (err) {}
+      }
+    };
+    window.addEventListener('storage', handleStorageChange);
+
     return () => {
       supabase.removeChannel(channel);
+      window.removeEventListener('storage', handleStorageChange);
     };
   }, []);
 
   const updateSettings = async (newSettings: Partial<SiteSettings>): Promise<boolean> => {
-    const updated = { ...settings, ...newSettings, updated_at: new Date().toISOString() };
+    // 1. Fetch latest DB state to perform a conflict-free merge
+    let latestBase = { ...settings };
+    try {
+      const { data } = await supabase
+        .from('site_settings')
+        .select('*')
+        .order('updated_at', { ascending: false })
+        .limit(1);
+
+      if (data && data.length > 0) {
+        const parsed = parseRowData(data[0]);
+        latestBase = { ...latestBase, ...parsed };
+      }
+    } catch (e) {}
+
+    // 2. Perform deep merge of newSettings over latestBase
+    const updated = { ...latestBase, ...newSettings, updated_at: new Date().toISOString() };
     setSettings(updated);
     localStorage.setItem('ls_site_settings', JSON.stringify(updated));
 
     try {
-      let existingId = updated.id;
-      if (!existingId) {
-        const { data } = await supabase
-          .from('site_settings')
-          .select('id')
-          .order('updated_at', { ascending: false })
-          .limit(1);
-
-        if (data && data.length > 0) {
-          existingId = data[0].id;
-        }
-      }
-
-      // Safe DB payload with backwards-compatible schema
       const dbPayload: Record<string, any> = {
         course_fee: updated.course_fee,
         emi_monthly: updated.emi_monthly,
@@ -198,8 +213,8 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         updated_at: updated.updated_at
       };
 
-      if (existingId) {
-        dbPayload.id = existingId;
+      if (latestBase.id) {
+        dbPayload.id = latestBase.id;
       }
 
       const { data, error } = await supabase
