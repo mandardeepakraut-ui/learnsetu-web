@@ -77,7 +77,15 @@ export const Footer: React.FC = () => {
         {/* Bottom Bar */}
         <div className="pt-8 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-slate-500 font-medium">
           <div>
-            Copyright © 2025 - 2026 | Learn Setu | All Rights Reserved. Built with ❤️ by Mandar Raut
+            Copyright © 2025 - 2026 | Learn Setu | All Rights Reserved. Built with ❤️ by{' '}
+            <a
+              href="https://www.linkedin.com/in/mandarraut-datascience/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-bold text-[#0067FF] hover:underline"
+            >
+              Mandar Raut
+            </a>
           </div>
           <div className="flex items-center gap-6">
             <a href="#" className="hover:text-slate-900">Privacy Policy</a>
