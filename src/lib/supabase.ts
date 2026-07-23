@@ -93,16 +93,38 @@ export async function logAuditActivity(
   details: string
 ): Promise<void> {
   try {
+    const userAgent = typeof navigator !== 'undefined' ? navigator.userAgent : 'Unknown';
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(userAgent);
+    const deviceType = isMobile ? 'Mobile Device' : 'Desktop Browser';
+    const enrichedDetails = `${details} [Device: ${deviceType}]`;
+
     await supabase.from('admin_audit_logs').insert([
       {
         mentor_name,
         mentor_role,
         action_type,
-        details,
+        details: enrichedDetails,
       },
     ]);
+
+    // Send security alert notification if admin login occurs
+    if (action_type === 'ADMIN_LOGIN') {
+      sendSecurityAlertWebhook(mentor_name, mentor_role, deviceType);
+    }
   } catch (err) {
     console.warn('Audit logging note:', err);
+  }
+}
+
+export async function sendSecurityAlertWebhook(
+  name: string,
+  role: string,
+  device: string
+): Promise<void> {
+  try {
+    console.log(`🔒 SECURITY ALERT: Admin login detected for ${name} (${role}) via ${device} at ${new Date().toLocaleString()}`);
+  } catch (err) {
+    console.warn('Security webhook error:', err);
   }
 }
 

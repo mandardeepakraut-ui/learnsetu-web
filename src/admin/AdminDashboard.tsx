@@ -4,6 +4,7 @@ import { useSettings } from '../context/SettingsContext';
 import { supabase, BrochureLead, SiteVisit, AdminAuditLog, logAuditActivity, AdminUser, AdminPermission, ALL_PERMISSIONS, DEFAULT_ADMIN_USERS, fetchAdminUsers, createAdminUser, updateAdminUserPermissions, deleteAdminUser } from '../lib/supabase';
 import { LearnSetuLogo } from '../components/LearnSetuLogo';
 import { OnlineVisitorState } from '../hooks/useRealtimePresence';
+import { useAdminAutoLogout } from '../hooks/useAdminAutoLogout';
 
 interface AdminDashboardProps {
   onLogout: () => void;
@@ -38,6 +39,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   currentAdmin = DEFAULT_ADMIN_USERS[0],
 }) => {
   const { settings, updateSettings } = useSettings();
+
+  // 30-minute Auto Logout Security Hook
+  const { formattedTime, isWarningOpen, extendSession } = useAdminAutoLogout({
+    timeoutMinutes: 30,
+    warningMinutes: 2,
+    onLogout,
+  });
+
   const [activeTab, setActiveTab] = useState<'pricing' | 'urgency' | 'announcement' | 'popup' | 'partners' | 'faqs' | 'testimonials' | 'contact' | 'founder' | 'security' | 'leads' | 'traffic' | 'audit' | 'admins'>('traffic');
   const [formData, setFormData] = useState(settings);
   const [leads, setLeads] = useState<BrochureLead[]>([]);
@@ -406,6 +415,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         </div>
 
         <div className="flex items-center gap-3">
+          <div
+            className="hidden lg:flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 text-slate-700 border border-slate-200 text-xs font-mono font-bold"
+            title="Auto logout after 30 minutes of inactivity"
+          >
+            <Clock className="w-3.5 h-3.5 text-amber-500" />
+            <span>IDLE TIMEOUT: {formattedTime}</span>
+          </div>
+
           <div className="hidden md:flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-mono font-bold">
             <span className="w-2 h-2 rounded-full bg-emerald-600 animate-pulse" />
             <span>SYNC ACTIVE</span>
@@ -420,6 +437,37 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           </button>
         </div>
       </header>
+
+      {/* Session Inactivity Warning Modal */}
+      {isWarningOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fadeIn">
+          <div className="bg-white p-6 rounded-3xl border border-amber-200 shadow-2xl max-w-md w-full space-y-4 text-center">
+            <div className="w-12 h-12 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center mx-auto">
+              <Clock className="w-6 h-6 animate-pulse" />
+            </div>
+            <h3 className="text-xl font-extrabold text-slate-900 font-display">
+              Session Inactivity Warning
+            </h3>
+            <p className="text-xs text-slate-600 font-medium">
+              Your admin session will automatically expire in <strong className="text-amber-600 font-mono text-sm">{formattedTime}</strong> due to 30 minutes of inactivity.
+            </p>
+            <div className="flex gap-3 pt-2">
+              <button
+                onClick={onLogout}
+                className="flex-1 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-all border border-slate-200"
+              >
+                Log Out Now
+              </button>
+              <button
+                onClick={extendSession}
+                className="flex-1 py-2.5 rounded-xl bg-[#0067FF] hover:bg-[#0052CC] text-white text-xs font-bold transition-all shadow-md shadow-[#0067FF]/20"
+              >
+                Extend Session
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Main Admin Container */}
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10">
