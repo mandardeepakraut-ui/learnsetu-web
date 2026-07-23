@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { Settings, Phone, DollarSign, User, ShieldCheck, Download, Save, LogOut, RefreshCw, Check, Sparkles, FileSpreadsheet, Megaphone, Clock, HelpCircle, Star, MessageCircle, Plus, Trash2, Edit3, Award, Lock, Building2, Video, KeyRound } from 'lucide-react';
+import { Settings, Phone, DollarSign, User, ShieldCheck, Download, Save, LogOut, RefreshCw, Check, Sparkles, FileSpreadsheet, Megaphone, Clock, HelpCircle, Star, MessageCircle, Plus, Trash2, Edit3, Award, Lock, Building2, Video, KeyRound, Activity, Monitor, Smartphone, Globe, Eye } from 'lucide-react';
 import { useSettings } from '../context/SettingsContext';
-import { supabase, BrochureLead } from '../lib/supabase';
+import { supabase, BrochureLead, SiteVisit } from '../lib/supabase';
 import { LearnSetuLogo } from '../components/LearnSetuLogo';
+import { OnlineVisitorState } from '../hooks/useRealtimePresence';
 
 interface AdminDashboardProps {
   onLogout: () => void;
+  onlineUsers?: OnlineVisitorState[];
+  onlineCount?: number;
 }
 
 interface FaqItem {
@@ -27,14 +30,48 @@ interface PartnerItem {
   package: string;
 }
 
-export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
+export const AdminDashboard: React.FC<AdminDashboardProps> = ({
+  onLogout,
+  onlineUsers = [],
+  onlineCount = 1,
+}) => {
   const { settings, updateSettings } = useSettings();
-  const [activeTab, setActiveTab] = useState<'pricing' | 'urgency' | 'announcement' | 'popup' | 'partners' | 'faqs' | 'testimonials' | 'contact' | 'founder' | 'security' | 'leads'>('pricing');
+  const [activeTab, setActiveTab] = useState<'pricing' | 'urgency' | 'announcement' | 'popup' | 'partners' | 'faqs' | 'testimonials' | 'contact' | 'founder' | 'security' | 'leads' | 'traffic'>('traffic');
   const [formData, setFormData] = useState(settings);
   const [leads, setLeads] = useState<BrochureLead[]>([]);
   const [savedSuccess, setSavedSuccess] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [loadingLeads, setLoadingLeads] = useState(false);
+
+  const [trafficSubTab, setTrafficSubTab] = useState<'live' | 'history'>('live');
+  const [dbVisits, setDbVisits] = useState<SiteVisit[]>([]);
+  const [loadingVisits, setLoadingVisits] = useState(false);
+  const [visitSearch, setVisitSearch] = useState('');
+
+  const fetchVisitHistory = async () => {
+    setLoadingVisits(true);
+    try {
+      const { data, error } = await supabase
+        .from('site_visits')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(50);
+      if (!error && data) {
+        setDbVisits(data as SiteVisit[]);
+      }
+    } catch (e) {
+      console.warn('Failed to load visit history:', e);
+    } finally {
+      setLoadingVisits(false);
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab === 'traffic' && trafficSubTab === 'history') {
+      fetchVisitHistory();
+    }
+  }, [activeTab, trafficSubTab]);
+
 
   // Dynamic FAQ list state inside admin
   const [faqList, setFaqList] = useState<FaqItem[]>(() => {
@@ -239,6 +276,18 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
         {/* Dashboard Navigation Tabs */}
         <div className="flex flex-wrap gap-2 border-b border-slate-200 pb-4 mb-8">
           <button
+            onClick={() => setActiveTab('traffic')}
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold transition-all ${
+              activeTab === 'traffic'
+                ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/20'
+                : 'bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100'
+            }`}
+          >
+            <Activity className="w-4 h-4 text-emerald-500 animate-pulse" />
+            <span>Live Traffic & Watchers ({onlineCount})</span>
+          </button>
+
+          <button
             onClick={() => setActiveTab('pricing')}
             className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold transition-all ${
               activeTab === 'pricing'
@@ -370,6 +419,213 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
             <span>Brochure Leads ({leads.length})</span>
           </button>
         </div>
+
+        {/* Tab 0: Real-Time Traffic & Live Watchers (ADMIN ONLY) */}
+        {activeTab === 'traffic' && (
+          <div className="p-8 rounded-3xl bg-slate-900 border border-slate-800 text-slate-100 shadow-2xl space-y-6">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
+                  <Activity className="w-6 h-6 animate-pulse" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                    Real-Time Visitor Analytics & Watchers
+                    <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                      ADMIN ONLY VIEW
+                    </span>
+                  </h3>
+                  <p className="text-xs text-slate-400">
+                    Private live stream of currently online website visitors, active pages, and historical database logs.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 bg-slate-950 p-1 rounded-xl border border-slate-800">
+                <button
+                  onClick={() => setTrafficSubTab('live')}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                    trafficSubTab === 'live'
+                      ? 'bg-emerald-600 text-white shadow'
+                      : 'text-slate-400 hover:text-white'
+                  }`}
+                >
+                  Live Watchers ({onlineCount})
+                </button>
+                <button
+                  onClick={() => setTrafficSubTab('history')}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                    trafficSubTab === 'history'
+                      ? 'bg-emerald-600 text-white shadow'
+                      : 'text-slate-400 hover:text-white'
+                  }`}
+                >
+                  DB History Logs
+                </button>
+              </div>
+            </div>
+
+            {/* Quick KPI Stats */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="p-4 rounded-2xl bg-slate-950/60 border border-slate-800">
+                <div className="text-xs text-slate-400 font-medium">Currently Watching Live</div>
+                <div className="mt-2 text-3xl font-black text-emerald-400 font-mono flex items-center gap-2">
+                  {onlineCount}
+                  <span className="relative flex h-3 w-3">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+                  </span>
+                </div>
+              </div>
+
+              <div className="p-4 rounded-2xl bg-slate-950/60 border border-slate-800">
+                <div className="text-xs text-slate-400 font-medium">Device Breakdown</div>
+                <div className="mt-2 text-sm text-slate-300 flex items-center gap-4">
+                  <span className="flex items-center gap-1 font-mono text-cyan-300 font-bold">
+                    <Monitor className="w-4 h-4" /> Desktop: {onlineUsers.filter(u => u.device !== 'Mobile').length}
+                  </span>
+                  <span className="flex items-center gap-1 font-mono text-purple-300 font-bold">
+                    <Smartphone className="w-4 h-4" /> Mobile: {onlineUsers.filter(u => u.device === 'Mobile').length}
+                  </span>
+                </div>
+              </div>
+
+              <div className="p-4 rounded-2xl bg-slate-950/60 border border-slate-800">
+                <div className="text-xs text-slate-400 font-medium">Presence Channel Status</div>
+                <div className="mt-2 text-sm font-bold text-emerald-400 flex items-center gap-2">
+                  <ShieldCheck className="w-4 h-4" /> Connected & Streaming
+                </div>
+              </div>
+            </div>
+
+            {/* Sub-Tab 1: Live Feed */}
+            {trafficSubTab === 'live' && (
+              <div className="space-y-4">
+                <h4 className="text-xs font-extrabold uppercase tracking-wider text-slate-400">
+                  Active Connected Users ({onlineUsers.length})
+                </h4>
+                {onlineUsers.length === 0 ? (
+                  <div className="py-12 text-center text-slate-500">
+                    <Eye className="w-8 h-8 mx-auto mb-2 opacity-40" />
+                    <p className="text-sm">Connecting to live presence channel...</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {onlineUsers.map((user, idx) => (
+                      <div
+                        key={user.sessionId || idx}
+                        className="p-4 rounded-2xl bg-slate-950/70 border border-slate-800 hover:border-emerald-500/50 transition-all space-y-3"
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <span className="p-2 rounded-xl bg-slate-800 text-emerald-400">
+                              {user.device === 'Mobile' ? (
+                                <Smartphone className="w-4 h-4" />
+                              ) : (
+                                <Monitor className="w-4 h-4" />
+                              )}
+                            </span>
+                            <div>
+                              <div className="text-xs font-bold text-white font-mono">
+                                Visitor ID: {user.visitorId ? user.visitorId.slice(0, 14) : 'Visitor'}
+                              </div>
+                              <div className="text-[11px] text-slate-400 flex items-center gap-1">
+                                <Globe className="w-3 h-3 text-slate-500" />
+                                Location: {user.location || 'India'}
+                              </div>
+                            </div>
+                          </div>
+                          <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                            Watching Live
+                          </span>
+                        </div>
+
+                        <div className="pt-2 border-t border-slate-800/80 text-xs flex items-center justify-between">
+                          <span className="text-slate-400">Active View:</span>
+                          <span className="font-mono text-emerald-300 font-bold bg-slate-900 px-2 py-0.5 rounded border border-slate-800">
+                            {user.currentPath || '/'}
+                          </span>
+                        </div>
+
+                        <div className="text-[10px] text-slate-500 flex justify-between font-mono">
+                          <span>Joined: {new Date(user.joinedAt).toLocaleTimeString()}</span>
+                          <span>Session: {user.sessionId ? user.sessionId.slice(0, 10) : ''}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Sub-Tab 2: Historical Database Visitor Logs */}
+            {trafficSubTab === 'history' && (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between gap-4">
+                  <input
+                    type="text"
+                    placeholder="Search by Visitor ID, Path, Device, or Referrer..."
+                    value={visitSearch}
+                    onChange={(e) => setVisitSearch(e.target.value)}
+                    className="flex-1 px-4 py-2 text-xs bg-slate-950 border border-slate-800 rounded-xl text-slate-200 focus:outline-none focus:border-emerald-500"
+                  />
+                  <button
+                    onClick={fetchVisitHistory}
+                    disabled={loadingVisits}
+                    className="flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-500 rounded-xl transition-colors disabled:opacity-50"
+                  >
+                    <RefreshCw className={`w-3.5 h-3.5 ${loadingVisits ? 'animate-spin' : ''}`} />
+                    Refresh Logs
+                  </button>
+                </div>
+
+                {loadingVisits ? (
+                  <div className="py-12 text-center text-slate-400">
+                    <RefreshCw className="w-6 h-6 mx-auto mb-2 animate-spin text-emerald-400" />
+                    <p className="text-xs">Fetching visitor log entries from Supabase DB...</p>
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto rounded-2xl border border-slate-800">
+                    <table className="w-full text-left text-xs text-slate-300">
+                      <thead className="bg-slate-950 text-slate-400 border-b border-slate-800">
+                        <tr>
+                          <th className="px-4 py-3 font-semibold">Timestamp</th>
+                          <th className="px-4 py-3 font-semibold">Visitor ID</th>
+                          <th className="px-4 py-3 font-semibold">Page Path</th>
+                          <th className="px-4 py-3 font-semibold">Referrer</th>
+                          <th className="px-4 py-3 font-semibold">Device</th>
+                          <th className="px-4 py-3 font-semibold">Duration</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-800/60 bg-slate-900/40 font-mono">
+                        {dbVisits
+                          .filter(
+                            (v) =>
+                              v.visitor_id?.toLowerCase().includes(visitSearch.toLowerCase()) ||
+                              v.page_path?.toLowerCase().includes(visitSearch.toLowerCase()) ||
+                              v.device_type?.toLowerCase().includes(visitSearch.toLowerCase()) ||
+                              v.referrer?.toLowerCase().includes(visitSearch.toLowerCase())
+                          )
+                          .map((visit) => (
+                            <tr key={visit.id || Math.random()} className="hover:bg-slate-800/40">
+                              <td className="px-4 py-3 text-slate-400 whitespace-nowrap">
+                                {visit.created_at ? new Date(visit.created_at).toLocaleString() : 'Just now'}
+                              </td>
+                              <td className="px-4 py-3 font-bold text-emerald-400">{visit.visitor_id?.slice(0, 12)}</td>
+                              <td className="px-4 py-3 text-cyan-300">{visit.page_path}</td>
+                              <td className="px-4 py-3 text-slate-400">{visit.referrer || 'Direct'}</td>
+                              <td className="px-4 py-3 text-purple-300">{visit.device_type}</td>
+                              <td className="px-4 py-3 text-amber-300">{visit.duration_seconds || 0}s</td>
+                            </tr>
+                          ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Tab 1: Pricing & Fee Settings */}
         {activeTab === 'pricing' && (

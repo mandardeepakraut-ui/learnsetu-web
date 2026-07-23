@@ -2,12 +2,15 @@ import React, { useState } from 'react';
 import { MessageCircle, FileText, Menu, X, Sparkles, ArrowRight } from 'lucide-react';
 import { LearnSetuLogo } from './LearnSetuLogo';
 import { useSettings } from '../context/SettingsContext';
+import { LiveVisitorBadge } from './LiveVisitorBadge';
 
 interface NavbarProps {
   onOpenBrochure: () => void;
+  onlineCount?: number;
+  onOpenDashboard?: () => void;
 }
 
-export const Navbar: React.FC<NavbarProps> = ({ onOpenBrochure }) => {
+export const Navbar: React.FC<NavbarProps> = ({ onOpenBrochure, onlineCount = 1, onOpenDashboard }) => {
   const { settings } = useSettings();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -89,6 +92,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenBrochure }) => {
             <span>Brochure</span>
           </button>
         </div>
+
 
         {/* Mobile Menu Toggle */}
         <button

@@ -39,3 +39,29 @@ CREATE POLICY "Public Update Settings" ON public.site_settings FOR ALL USING (tr
 
 CREATE POLICY "Public Insert Leads" ON public.brochure_leads FOR INSERT WITH CHECK (true);
 CREATE POLICY "Public Read Leads" ON public.brochure_leads FOR SELECT USING (true);
+
+-- 3. Create Site Visits Table (For Real-Time & Historical Visitor Tracking)
+CREATE TABLE IF NOT EXISTS public.site_visits (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  visitor_id TEXT NOT NULL,
+  session_id TEXT NOT NULL,
+  page_path TEXT DEFAULT '/',
+  referrer TEXT,
+  user_agent TEXT,
+  device_type TEXT DEFAULT 'Desktop',
+  location_info TEXT DEFAULT 'India',
+  duration_seconds INTEGER DEFAULT 0,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now())
+);
+
+-- Enable RLS and public policies for site_visits
+ALTER TABLE public.site_visits ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Public Insert Visits" ON public.site_visits FOR INSERT WITH CHECK (true);
+CREATE POLICY "Public Update Visits" ON public.site_visits FOR UPDATE USING (true);
+CREATE POLICY "Public Read Visits" ON public.site_visits FOR SELECT USING (true);
+
+-- Enable Supabase Realtime publication on site_visits table (optional if listening to DB changes)
+-- ALTER PUBLICATION supabase_realtime ADD TABLE public.site_visits;
+

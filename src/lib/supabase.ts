@@ -48,3 +48,18 @@ export interface BrochureLead {
   program: string;
   created_at?: string;
 }
+
+export interface SiteVisit {
+  id?: string;
+  visitor_id: string;
+  session_id: string;
+  page_path: string;
+  referrer?: string;
+  user_agent?: string;
+  device_type?: string;
+  location_info?: string;
+  duration_seconds?: number;
+  created_at?: string;
+  updated_at?: string;
+}
+

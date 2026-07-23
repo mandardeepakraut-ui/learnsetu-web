@@ -5,7 +5,11 @@ import { useSettings } from '../context/SettingsContext';
 import { PrivacyPolicyModal } from './PrivacyPolicyModal';
 import { TermsOfServiceModal } from './TermsOfServiceModal';
 
-export const Footer: React.FC = () => {
+interface FooterProps {
+  onOpenDashboard?: () => void;
+}
+
+export const Footer: React.FC<FooterProps> = ({ onOpenDashboard }) => {
   const { settings } = useSettings();
   const [privacyOpen, setPrivacyOpen] = useState(false);
   const [termsOpen, setTermsOpen] = useState(false);
@@ -13,16 +17,16 @@ export const Footer: React.FC = () => {
   return (
     <footer className="bg-white border-t border-slate-200/80 pt-16 pb-12 text-xs text-slate-600">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        
+
         <div className="grid grid-cols-1 md:grid-cols-4 gap-10 pb-12 border-b border-slate-200/60">
-          
+
           {/* Col 1: Brand Info & Social Media Links */}
           <div className="space-y-4">
             <LearnSetuLogo showTagline={true} size="md" />
             <p className="text-xs leading-relaxed text-slate-600">
               Leading Online Learning Academy for Data Science & AI Mastery. Transform your tech career with expert guidance, real projects, and guaranteed placement support.
             </p>
-            
+
             {/* Social Media Links */}
             <div className="pt-2 flex items-center gap-3">
               <a
@@ -83,7 +87,7 @@ export const Footer: React.FC = () => {
           {/* Col 4: Contact & Mentorship Support */}
           <div className="space-y-4">
             <h4 className="text-sm font-bold text-slate-900 uppercase font-mono tracking-wider">Connect With Mentors</h4>
-            
+
             {/* WhatsApp Direct Link */}
             <a
               href="https://wa.me/918591928362?text=Hi%20Team%20Learnsetu%2C%20I%20want%20to%20know%20more%20about%20your%20Data%20Science%20program."
@@ -129,12 +133,13 @@ export const Footer: React.FC = () => {
               Manthan Saindane
             </a>
           </div>
-          
+
           <div className="flex items-center gap-6">
             <a href="https://www.instagram.com/learnsetu.in/" target="_blank" rel="noopener noreferrer" className="hover:text-pink-600 font-semibold transition-colors">Instagram</a>
             <a href="https://www.linkedin.com/company/learnsetu/posts/?feedView=all" target="_blank" rel="noopener noreferrer" className="hover:text-[#0067FF] font-semibold transition-colors">LinkedIn</a>
             <button onClick={() => setPrivacyOpen(true)} className="hover:text-slate-900 font-semibold transition-colors">Privacy Policy</button>
             <button onClick={() => setTermsOpen(true)} className="hover:text-slate-900 font-semibold transition-colors">Terms of Service</button>
+            <a href="#admin" className="hover:text-[#0067FF] font-semibold transition-colors text-slate-400">Admin Portal</a>
           </div>
         </div>
 
@@ -145,3 +150,4 @@ export const Footer: React.FC = () => {
     </footer>
   );
 };
+

@@ -19,21 +19,43 @@ import { WebinarPopupModal } from './components/WebinarPopupModal';
 import { Footer } from './components/Footer';
 import { AdminLogin } from './admin/AdminLogin';
 import { AdminDashboard } from './admin/AdminDashboard';
+import { useRealtimePresence } from './hooks/useRealtimePresence';
+import { AdminVisitorDashboard } from './components/AdminVisitorDashboard';
 
 const MainSiteContent: React.FC = () => {
   const [brochureOpen, setBrochureOpen] = useState(false);
-  const [isAdminView, setIsAdminView] = useState(false);
+  const [isAdminView, setIsAdminView] = useState<boolean>(() => {
+    return window.location.hash === '#admin' || window.location.pathname === '/admin';
+  });
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
+  const [isVisitorDashboardOpen, setIsVisitorDashboardOpen] = useState(false);
+
+  // Initialize Real-time Presence tracking
+  const { onlineUsers, onlineCount } = useRealtimePresence();
 
   useEffect(() => {
     const checkAdminHash = () => {
       if (window.location.hash === '#admin' || window.location.pathname === '/admin') {
         setIsAdminView(true);
+      } else {
+        setIsAdminView(false);
       }
     };
     checkAdminHash();
     window.addEventListener('hashchange', checkAdminHash);
     return () => window.removeEventListener('hashchange', checkAdminHash);
+  }, []);
+
+  // Hotkey listener for Admin Visitor Analytics (Ctrl + Shift + V)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'v') {
+        e.preventDefault();
+        setIsVisitorDashboardOpen((prev) => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
   const scrollToCourse = () => {
@@ -54,6 +76,8 @@ const MainSiteContent: React.FC = () => {
           setIsAdminView(false);
           window.location.hash = '';
         }}
+        onlineUsers={onlineUsers}
+        onlineCount={onlineCount}
       />
     );
   }
@@ -61,7 +85,11 @@ const MainSiteContent: React.FC = () => {
   return (
     <div className="min-h-screen bg-[#FAFAFC] text-[#0F172A] flex flex-col font-body selection:bg-[#0067FF] selection:text-white">
       <SeoHead />
-      <Navbar onOpenBrochure={() => setBrochureOpen(true)} />
+      <Navbar
+        onOpenBrochure={() => setBrochureOpen(true)}
+        onlineCount={onlineCount}
+        onOpenDashboard={() => setIsVisitorDashboardOpen(true)}
+      />
 
       <main className="flex-1">
         <Hero
@@ -100,17 +128,25 @@ const MainSiteContent: React.FC = () => {
         <FaqSection />
       </main>
 
-      <Footer />
+      <Footer onOpenDashboard={() => setIsVisitorDashboardOpen(true)} />
 
       <BrochureModal
         isOpen={brochureOpen}
         onClose={() => setBrochureOpen(false)}
       />
 
+      <AdminVisitorDashboard
+        isOpen={isVisitorDashboardOpen}
+        onClose={() => setIsVisitorDashboardOpen(false)}
+        onlineUsers={onlineUsers}
+        onlineCount={onlineCount}
+      />
+
       <WebinarPopupModal />
     </div>
   );
 };
+
 
 export const App: React.FC = () => {
   return (
