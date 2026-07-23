@@ -36,6 +36,9 @@ export interface SiteSettings {
   popup_description?: string;
   popup_button_text?: string;
   popup_button_url?: string;
+  telegram_bot_token?: string;
+  telegram_chat_id?: string;
+  telegram_alerts_enabled?: boolean;
   updated_at?: string;
 }
 

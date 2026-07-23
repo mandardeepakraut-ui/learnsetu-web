@@ -5,6 +5,7 @@ import { supabase, BrochureLead, SiteVisit, AdminAuditLog, logAuditActivity, Adm
 import { LearnSetuLogo } from '../components/LearnSetuLogo';
 import { OnlineVisitorState } from '../hooks/useRealtimePresence';
 import { useAdminAutoLogout } from '../hooks/useAdminAutoLogout';
+import { sendTelegramAdminLoginAlert } from '../lib/telegramAlerts';
 
 interface AdminDashboardProps {
   onLogout: () => void;
@@ -1836,6 +1837,70 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 />
                 <p className="text-[11px] text-slate-500 mt-1">This secret key will be required to log into the Admin Dashboard (`/admin`).</p>
               </div>
+
+              {/* Telegram Instant Mobile Security Alerts */}
+              <div className="pt-6 border-t border-slate-200 space-y-4">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                  <div>
+                    <h4 className="text-sm font-extrabold text-slate-900 flex items-center gap-2">
+                      <MessageCircle className="w-4 h-4 text-[#0067FF]" />
+                      <span>Telegram Mobile Security Login Alerts</span>
+                    </h4>
+                    <p className="text-xs text-slate-500">
+                      Receive an instant notification on your Telegram phone app whenever an admin logs into the portal.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      if (!formData.telegram_bot_token || !formData.telegram_chat_id) {
+                        alert('Please enter both Telegram Bot Token and Chat ID first.');
+                        return;
+                      }
+                      const ok = await sendTelegramAdminLoginAlert({
+                        botToken: formData.telegram_bot_token,
+                        chatId: formData.telegram_chat_id,
+                        mentorName: currentAdmin.name,
+                        mentorRole: currentAdmin.role,
+                        username: currentAdmin.username,
+                        device: 'TEST ALERT DISPATCH',
+                      });
+                      if (ok) {
+                        alert('✅ Test security alert sent to Telegram successfully!');
+                      } else {
+                        alert('❌ Failed to send Telegram alert. Please verify your Bot Token & Chat ID.');
+                      }
+                    }}
+                    className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-all border border-slate-200 whitespace-nowrap"
+                  >
+                    Send Test Alert
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">Telegram Bot Token</label>
+                    <input
+                      type="text"
+                      value={formData.telegram_bot_token || ''}
+                      onChange={(e) => setFormData({ ...formData, telegram_bot_token: e.target.value })}
+                      placeholder="e.g. 123456789:ABCdefGHIjkl..."
+                      className="w-full px-4 py-2.5 rounded-xl bg-[#FAFAFC] border border-slate-300 text-slate-900 font-mono text-xs focus:outline-none focus:border-[#0067FF]"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">Telegram Chat ID / User ID</label>
+                    <input
+                      type="text"
+                      value={formData.telegram_chat_id || ''}
+                      onChange={(e) => setFormData({ ...formData, telegram_chat_id: e.target.value })}
+                      placeholder="e.g. 987654321 or -100123456"
+                      className="w-full px-4 py-2.5 rounded-xl bg-[#FAFAFC] border border-slate-300 text-slate-900 font-mono text-xs focus:outline-none focus:border-[#0067FF]"
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
 
             <button
@@ -1844,7 +1909,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               className="w-full py-4 rounded-xl bg-[#0067FF] hover:bg-[#0052CC] text-white font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-[#0067FF]/20 transition-all active:scale-95"
             >
               {isSaving ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-              <span>Save Secret Admin Passcode</span>
+              <span>Save Passcode & Telegram Security Alert Settings</span>
             </button>
           </form>
         )}

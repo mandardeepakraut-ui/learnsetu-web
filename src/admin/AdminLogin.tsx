@@ -3,6 +3,7 @@ import { ShieldCheck, Lock, User, ArrowRight, KeyRound } from 'lucide-react';
 import { LearnSetuLogo } from '../components/LearnSetuLogo';
 import { useSettings } from '../context/SettingsContext';
 import { AdminUser, DEFAULT_ADMIN_USERS, fetchAdminUsers, logAuditActivity } from '../lib/supabase';
+import { sendTelegramAdminLoginAlert } from '../lib/telegramAlerts';
 
 interface AdminLoginProps {
   onLoginSuccess: (adminUser: AdminUser) => void;
@@ -60,6 +61,20 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onLoginSuccess }) => {
         'ADMIN_LOGIN',
         `Logged in successfully as ${authenticatedUser.username} (${authenticatedUser.name})`
       );
+
+      // Trigger Telegram Security Login Alert
+      if (settings.telegram_bot_token && settings.telegram_chat_id) {
+        const isMobile = typeof navigator !== 'undefined' && /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+        sendTelegramAdminLoginAlert({
+          botToken: settings.telegram_bot_token,
+          chatId: settings.telegram_chat_id,
+          mentorName: authenticatedUser.name,
+          mentorRole: authenticatedUser.role,
+          username: authenticatedUser.username,
+          device: isMobile ? 'Mobile Device' : 'Desktop Browser',
+        });
+      }
+
       onLoginSuccess(authenticatedUser);
     } else {
       setErrorMsg('Invalid Username or Password. Please check credentials and try again.');
