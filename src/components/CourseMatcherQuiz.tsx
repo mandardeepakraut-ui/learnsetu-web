@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { HelpCircle, Check, ArrowRight, RotateCcw, Sparkles } from 'lucide-react';
 import confetti from 'canvas-confetti';
+import { useSettings } from '../context/SettingsContext';
 
 interface CourseMatcherQuizProps {
   onOpenBrochure: () => void;
@@ -8,10 +9,11 @@ interface CourseMatcherQuizProps {
 }
 
 export const CourseMatcherQuiz: React.FC<CourseMatcherQuizProps> = ({ onOpenBrochure, onSelectCourse }) => {
+  const { settings } = useSettings();
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<number[]>([]);
 
-  const whatsappEnrollUrl = "https://wa.me/918591928362?text=Hi%20LearnSetu%20Team%2C%20I%20want%20to%20enroll%20in%20the%20Master%20Program%20in%20Data%20Science%20%26%20AI%20(%E2%82%B914%2C999%20Fee%20%2F%2012-Month%20EMI).%20Please%20guide%20me%20with%20the%20registration%20and%20batch%20details.";
+  const whatsappEnrollUrl = `https://wa.me/${settings.whatsapp_number}?text=Hi%20LearnSetu%20Team%2C%20I%20want%20to%20enroll%20in%20the%20Master%20Program%20in%20Data%20Science%20%26%20AI%20(${encodeURIComponent(settings.course_fee)}%20Fee%20%2F%2012-Month%20EMI).%20Please%20guide%20me%20with%20the%20registration%20and%20batch%20details.`;
 
   const questions = [
     {
@@ -94,7 +96,7 @@ export const CourseMatcherQuiz: React.FC<CourseMatcherQuizProps> = ({ onOpenBroc
                 <span className="text-xs font-mono font-bold text-emerald-600 uppercase">100% MATCH FOUND</span>
                 <h3 className="text-2xl font-bold text-slate-900 mt-1">Master Program in Data Science & AI</h3>
                 <p className="text-xs text-slate-600 max-w-md mx-auto mt-2">
-                  Based on your goals and background, the 24-Week Master Program (₹14,999 full fee / ₹1,250 mo EMI) with 1:1 mentorship is your optimal career path.
+                  Based on your goals and background, the 24-Week Master Program ({settings.course_fee} full fee / {settings.emi_monthly} EMI) with 1:1 mentorship is your optimal career path.
                 </p>
               </div>
 

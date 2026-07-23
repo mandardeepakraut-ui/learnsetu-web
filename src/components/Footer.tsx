@@ -1,8 +1,10 @@
 import React from 'react';
 import { MessageCircle, Mail, Instagram, Linkedin } from 'lucide-react';
 import { LearnSetuLogo } from './LearnSetuLogo';
+import { useSettings } from '../context/SettingsContext';
 
 export const Footer: React.FC = () => {
+  const { settings } = useSettings();
   return (
     <footer className="bg-white border-t border-slate-200/80 pt-16 pb-12 text-xs text-slate-600">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -51,7 +53,7 @@ export const Footer: React.FC = () => {
             <h4 className="text-sm font-bold text-slate-900 uppercase font-mono tracking-wider">Programs</h4>
             <ul className="space-y-2 font-medium">
               <li>
-                <a href="#master-course" className="hover:text-[#0067FF] transition-colors">Master Program in Data Science & AI (₹14,999)</a>
+                <a href="#master-course" className="hover:text-[#0067FF] transition-colors">Master Program in Data Science & AI ({settings.course_fee})</a>
               </li>
               <li>
                 <a href="#syllabi" className="hover:text-[#0067FF] transition-colors">Business Analytics Essentials (Soon)</a>

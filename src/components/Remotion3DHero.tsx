@@ -1,7 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Sparkles, Activity, Database } from 'lucide-react';
+import { useSettings } from '../context/SettingsContext';
 
 export const Remotion3DHero: React.FC = () => {
+  const { settings } = useSettings();
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [activeFrame, setActiveFrame] = useState(0);
 
@@ -209,7 +211,7 @@ export const Remotion3DHero: React.FC = () => {
         <div className="p-3 rounded-2xl bg-white/95 border border-slate-200 shadow-md text-xs flex items-center gap-2.5">
           <Sparkles className="w-4 h-4 text-[#4F46E5]" />
           <div>
-            <div className="font-bold text-slate-900">₹14,999</div>
+            <div className="font-bold text-slate-900">{settings.course_fee}</div>
             <div className="text-[10px] text-slate-500">Complete Fee</div>
           </div>
         </div>

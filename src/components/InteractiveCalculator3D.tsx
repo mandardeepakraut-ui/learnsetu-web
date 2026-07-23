@@ -1,18 +1,20 @@
 import React, { useState } from 'react';
 import { Calculator, TrendingUp, DollarSign, Award, CheckCircle2, ArrowRight } from 'lucide-react';
+import { useSettings } from '../context/SettingsContext';
 
 interface InteractiveCalculator3DProps {
   onOpenBrochure: () => void;
 }
 
 export const InteractiveCalculator3D: React.FC<InteractiveCalculator3DProps> = ({ onOpenBrochure }) => {
+  const { settings } = useSettings();
   const [experience, setExperience] = useState<number>(0); // 0 = Fresher, 1 = 1-2 Yrs, 2 = 3+ Yrs
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
 
   const expLevels = [
-    { label: 'Fresher / Non-Tech', currentSalary: '₹3.5 LPA', avgHike: '+80%', projectedSalary: '₹6.5 - ₹8.0 LPA', emi: '₹1,250' },
-    { label: '1 - 2 Yrs IT Pro', currentSalary: '₹5.0 LPA', avgHike: '+75%', projectedSalary: '₹9.0 - ₹12.0 LPA', emi: '₹1,250' },
-    { label: '3+ Yrs Experienced', currentSalary: '₹7.5 LPA', avgHike: '+70%', projectedSalary: '₹13.0 - ₹18.0 LPA', emi: '₹1,250' },
+    { label: 'Fresher / Non-Tech', currentSalary: '₹3.5 LPA', avgHike: '+80%', projectedSalary: '₹6.5 - ₹8.0 LPA', emi: settings.emi_monthly },
+    { label: '1 - 2 Yrs IT Pro', currentSalary: '₹5.0 LPA', avgHike: '+75%', projectedSalary: '₹9.0 - ₹12.0 LPA', emi: settings.emi_monthly },
+    { label: '3+ Yrs Experienced', currentSalary: '₹7.5 LPA', avgHike: '+70%', projectedSalary: '₹13.0 - ₹18.0 LPA', emi: settings.emi_monthly },
   ];
 
   const currentLevel = expLevels[experience];
@@ -131,7 +133,7 @@ export const InteractiveCalculator3D: React.FC<InteractiveCalculator3DProps> = (
               {/* EMI Calculator Breakdown */}
               <div className="p-4 rounded-2xl bg-[#0067FF]/5 border border-[#0067FF]/20 flex items-center justify-between">
                 <div>
-                  <div className="text-xs font-bold text-slate-900">Program Fee: ₹14,999</div>
+                  <div className="text-xs font-bold text-slate-900">Program Fee: {settings.course_fee}</div>
                   <div className="text-[11px] text-slate-500">12 Month No Cost EMI Option</div>
                 </div>
                 <div className="text-right">

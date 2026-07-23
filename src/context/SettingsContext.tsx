@@ -95,18 +95,19 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       const { data, error } = await supabase
         .from('site_settings')
         .select('*')
-        .limit(1)
-        .single();
+        .order('updated_at', { ascending: false })
+        .limit(1);
 
-      if (data && !error) {
+      if (data && data.length > 0 && !error) {
+        const latest = data[0];
         setSettings((prev) => {
-          const merged = { ...defaultSettings, ...prev, ...data };
+          const merged = { ...defaultSettings, ...prev, ...latest };
           localStorage.setItem('ls_site_settings', JSON.stringify(merged));
           return merged;
         });
       }
     } catch (err) {
-      console.log('Using local settings fallback');
+      console.log('Using local settings fallback:', err);
     } finally {
       setLoading(false);
     }
@@ -139,16 +140,36 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     localStorage.setItem('ls_site_settings', JSON.stringify(updated));
 
     try {
-      const { error } = await supabase
+      let existingId = updated.id;
+      if (!existingId) {
+        const { data } = await supabase
+          .from('site_settings')
+          .select('id')
+          .order('updated_at', { ascending: false })
+          .limit(1);
+
+        if (data && data.length > 0) {
+          existingId = data[0].id;
+        }
+      }
+
+      const payload = existingId ? { ...updated, id: existingId } : updated;
+
+      const { data, error } = await supabase
         .from('site_settings')
-        .upsert(updated);
+        .upsert(payload)
+        .select();
 
       if (error) {
-        console.error('Database update notice (saved locally):', error);
+        console.error('Database update error:', error);
+      } else if (data && data.length > 0) {
+        const fresh = { ...updated, ...data[0] };
+        setSettings(fresh);
+        localStorage.setItem('ls_site_settings', JSON.stringify(fresh));
       }
       return true;
     } catch (err) {
-      console.error('Update notice (saved locally):', err);
+      console.error('Update error:', err);
       return true;
     }
   };
