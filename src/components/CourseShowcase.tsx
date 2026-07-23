@@ -90,8 +90,8 @@ export const CourseShowcase: React.FC<CourseShowcaseProps> = ({ onOpenBrochure, 
         {/* Course Card Grid (Asymmetric Split) */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           
-          {/* Left Sticky Summary Card */}
-          <div className="lg:col-span-5 bg-white p-8 rounded-3xl border border-slate-200 shadow-xl shadow-slate-200/60 sticky top-28 space-y-6">
+          {/* Left Summary Card (Sticky on desktop, relative flow on mobile) */}
+          <div className="lg:col-span-5 bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-xl shadow-slate-200/60 relative lg:sticky lg:top-28 space-y-6">
             <div className="flex items-center justify-between">
               <span className="px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-mono font-bold border border-emerald-200">
                 NOW ENROLLING
