@@ -15,6 +15,7 @@ interface CompanyLogo {
   fallbackSrc: string;
   avgPackage: string;
   hike: string;
+  scaleClass?: string;
 }
 
 export const HiringPartners: React.FC = () => {
@@ -26,56 +27,64 @@ export const HiringPartners: React.FC = () => {
       imgSrc: tcsImg,
       fallbackSrc: '/companies/TCS.jpg',
       avgPackage: '₹6.5 - ₹8.0 LPA',
-      hike: '+65% Hike'
+      hike: '+65% Hike',
+      scaleClass: 'scale-125 max-h-12'
     },
     {
       name: 'Infosys',
       imgSrc: infosysImg,
       fallbackSrc: '/companies/INFOSYS.jpg',
       avgPackage: '₹7.0 - ₹9.5 LPA',
-      hike: '+70% Hike'
+      hike: '+70% Hike',
+      scaleClass: 'max-h-10'
     },
     {
       name: 'Wipro',
       imgSrc: wiproImg,
       fallbackSrc: '/companies/WIPRO.jpg',
       avgPackage: '₹6.8 - ₹8.5 LPA',
-      hike: '+68% Hike'
+      hike: '+68% Hike',
+      scaleClass: 'max-h-10'
     },
     {
       name: 'Accenture',
       imgSrc: accentureImg,
       fallbackSrc: '/companies/ACCENTURE.jpg',
       avgPackage: '₹8.0 - ₹11.0 LPA',
-      hike: '+75% Hike'
+      hike: '+75% Hike',
+      scaleClass: 'max-h-10'
     },
     {
       name: 'Cognizant',
       imgSrc: cognizantImg,
       fallbackSrc: '/companies/COGNIZANT.jpg',
       avgPackage: '₹7.2 - ₹9.8 LPA',
-      hike: '+72% Hike'
+      hike: '+72% Hike',
+      scaleClass: 'max-h-10'
     },
     {
       name: 'Capgemini',
       imgSrc: capgeminiImg,
       fallbackSrc: '/companies/CAPGEMINI.jpg',
       avgPackage: '₹7.5 - ₹10.2 LPA',
-      hike: '+75% Hike'
+      hike: '+75% Hike',
+      scaleClass: 'max-h-10'
     },
     {
       name: 'IBM',
       imgSrc: ibmImg,
       fallbackSrc: '/companies/IBM.jpg',
       avgPackage: '₹8.5 - ₹12.0 LPA',
-      hike: '+80% Hike'
+      hike: '+80% Hike',
+      scaleClass: 'max-h-10'
     },
     {
       name: 'StartTech',
       imgSrc: startechImg,
       fallbackSrc: '/companies/STARTECH.jpg',
       avgPackage: '₹7.0 - ₹9.0 LPA',
-      hike: '+70% Hike'
+      hike: '+70% Hike',
+      scaleClass: 'scale-125 max-h-12'
     }
   ];
 
@@ -112,7 +121,9 @@ export const HiringPartners: React.FC = () => {
                       (e.target as HTMLImageElement).src = company.fallbackSrc;
                     }}
                     alt={`${company.name} Official Logo`}
-                    className="max-h-11 max-w-full object-contain filter contrast-110 transition-all"
+                    className={`max-w-full object-contain filter contrast-110 transition-all ${
+                      company.scaleClass || 'max-h-10'
+                    }`}
                   />
                 </div>
 
