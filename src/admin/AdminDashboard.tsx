@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Settings, Phone, DollarSign, User, ShieldCheck, Download, Save, LogOut, RefreshCw, Check, Sparkles, FileSpreadsheet, Megaphone, Clock, HelpCircle, Star, MessageCircle, Plus, Trash2, Edit3, Award } from 'lucide-react';
+import { Settings, Phone, DollarSign, User, ShieldCheck, Download, Save, LogOut, RefreshCw, Check, Sparkles, FileSpreadsheet, Megaphone, Clock, HelpCircle, Star, MessageCircle, Plus, Trash2, Edit3, Award, Lock, Building2, Video, KeyRound } from 'lucide-react';
 import { useSettings } from '../context/SettingsContext';
 import { supabase, BrochureLead } from '../lib/supabase';
 import { LearnSetuLogo } from '../components/LearnSetuLogo';
@@ -21,9 +21,15 @@ interface TestimonialItem {
   stars: number;
 }
 
+interface PartnerItem {
+  name: string;
+  hike: string;
+  package: string;
+}
+
 export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
   const { settings, updateSettings } = useSettings();
-  const [activeTab, setActiveTab] = useState<'pricing' | 'urgency' | 'announcement' | 'faqs' | 'testimonials' | 'contact' | 'founder' | 'leads'>('pricing');
+  const [activeTab, setActiveTab] = useState<'pricing' | 'urgency' | 'announcement' | 'popup' | 'partners' | 'faqs' | 'testimonials' | 'contact' | 'founder' | 'security' | 'leads'>('pricing');
   const [formData, setFormData] = useState(settings);
   const [leads, setLeads] = useState<BrochureLead[]>([]);
   const [savedSuccess, setSavedSuccess] = useState(false);
@@ -57,6 +63,22 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
     ];
   });
 
+  // Dynamic Hiring Partners list state inside admin
+  const [partnerList, setPartnerList] = useState<PartnerItem[]>(() => {
+    if (settings.custom_hiring_partners) {
+      try {
+        const parsed = JSON.parse(settings.custom_hiring_partners);
+        if (Array.isArray(parsed)) return parsed;
+      } catch (e) {}
+    }
+    return [
+      { name: 'TCS', hike: '+65% Hike', package: '₹6.5 - ₹8.0 LPA' },
+      { name: 'Infosys', hike: '+70% Hike', package: '₹7.0 - ₹9.5 LPA' },
+      { name: 'Wipro', hike: '+68% Hike', package: '₹6.8 - ₹8.5 LPA' },
+      { name: 'Accenture', hike: '+75% Hike', package: '₹8.0 - ₹11.0 LPA' }
+    ];
+  });
+
   useEffect(() => {
     setFormData(settings);
     if (settings.custom_faqs) {
@@ -64,6 +86,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
     }
     if (settings.custom_testimonials) {
       try { setTestimonialList(JSON.parse(settings.custom_testimonials)); } catch (e) {}
+    }
+    if (settings.custom_hiring_partners) {
+      try { setPartnerList(JSON.parse(settings.custom_hiring_partners)); } catch (e) {}
     }
   }, [settings]);
 
@@ -97,7 +122,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
     const toSave = {
       ...formData,
       custom_faqs: JSON.stringify(faqList),
-      custom_testimonials: JSON.stringify(testimonialList)
+      custom_testimonials: JSON.stringify(testimonialList),
+      custom_hiring_partners: JSON.stringify(partnerList)
     };
     const success = await updateSettings(toSave);
     setIsSaving(false);
@@ -156,6 +182,21 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
     const updated = [...testimonialList];
     updated[index] = { ...updated[index], [field]: value };
     setTestimonialList(updated);
+  };
+
+  // Partner handlers
+  const handleAddPartner = () => {
+    setPartnerList([...partnerList, { name: "Company Name", hike: "+70% Hike", package: "₹7.0 - ₹9.0 LPA" }]);
+  };
+
+  const handleRemovePartner = (index: number) => {
+    setPartnerList(partnerList.filter((_, i) => i !== index));
+  };
+
+  const handleUpdatePartner = (index: number, field: keyof PartnerItem, value: string) => {
+    const updated = [...partnerList];
+    updated[index][field] = value;
+    setPartnerList(updated);
   };
 
   return (
@@ -230,7 +271,31 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
             }`}
           >
             <Megaphone className="w-4 h-4 text-pink-500" />
-            <span>Top Offer Banner</span>
+            <span>Top Banner Bar</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('popup')}
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold transition-all ${
+              activeTab === 'popup'
+                ? 'bg-[#0067FF] text-white shadow-lg shadow-[#0067FF]/20'
+                : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
+            }`}
+          >
+            <Video className="w-4 h-4 text-purple-500" />
+            <span>Webinar Popup Modal</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('partners')}
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold transition-all ${
+              activeTab === 'partners'
+                ? 'bg-[#0067FF] text-white shadow-lg shadow-[#0067FF]/20'
+                : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
+            }`}
+          >
+            <Building2 className="w-4 h-4 text-emerald-500" />
+            <span>Hiring Partners</span>
           </button>
 
           <button
@@ -265,7 +330,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                 : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
             }`}
           >
-            <Phone className="w-4 h-4 text-emerald-500" />
+            <Phone className="w-4 h-4 text-teal-500" />
             <span>WhatsApp & Email</span>
           </button>
 
@@ -279,6 +344,18 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
           >
             <User className="w-4 h-4" />
             <span>Leadership Bio</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('security')}
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold transition-all ${
+              activeTab === 'security'
+                ? 'bg-[#0067FF] text-white shadow-lg shadow-[#0067FF]/20'
+                : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
+            }`}
+          >
+            <KeyRound className="w-4 h-4 text-rose-500" />
+            <span>Passcode Security</span>
           </button>
 
           <button
@@ -485,7 +562,182 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
           </form>
         )}
 
-        {/* Tab 4: FAQ Manager */}
+        {/* Tab 4: Webinar & Live Masterclass Popup Modal Settings */}
+        {activeTab === 'popup' && (
+          <form onSubmit={handleSave} className="p-8 rounded-3xl bg-white border border-slate-200 shadow-xl space-y-6 max-w-2xl">
+            <h3 className="text-xl font-extrabold text-slate-900 flex items-center gap-2">
+              <Video className="w-5 h-5 text-purple-600" />
+              <span>Live Masterclass & Webinar Popup Modal</span>
+            </h3>
+
+            <div className="space-y-4">
+              <div className="flex items-center justify-between p-4 bg-[#FAFAFC] rounded-2xl border border-slate-200">
+                <div>
+                  <div className="text-xs font-bold text-slate-900">Enable Live Event Popup Modal</div>
+                  <div className="text-[11px] text-slate-500">Show floating event announcement popup to website visitors</div>
+                </div>
+                <input
+                  type="checkbox"
+                  checked={formData.popup_active ?? false}
+                  onChange={(e) => setFormData({ ...formData, popup_active: e.target.checked })}
+                  className="w-5 h-5 accent-[#0067FF] cursor-pointer"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Top Eyebrow Badge Text</label>
+                <input
+                  type="text"
+                  value={formData.popup_badge || ''}
+                  onChange={(e) => setFormData({ ...formData, popup_badge: e.target.value })}
+                  placeholder="SPECIAL LIVE SESSION THIS SATURDAY"
+                  className="w-full px-4 py-3 rounded-xl bg-[#FAFAFC] border border-slate-300 text-slate-900 font-bold text-sm focus:outline-none focus:border-[#0067FF]"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Popup Headline Title</label>
+                <input
+                  type="text"
+                  value={formData.popup_title || ''}
+                  onChange={(e) => setFormData({ ...formData, popup_title: e.target.value })}
+                  placeholder="⚡ Free Live Masterclass: Build Your First LLM Application"
+                  className="w-full px-4 py-3 rounded-xl bg-[#FAFAFC] border border-slate-300 text-slate-900 font-bold text-sm focus:outline-none focus:border-[#0067FF]"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Popup Description Body</label>
+                <textarea
+                  rows={3}
+                  value={formData.popup_description || ''}
+                  onChange={(e) => setFormData({ ...formData, popup_description: e.target.value })}
+                  placeholder="Join Sagar Parmar live to learn how to build production AI applications with Python & OpenAI..."
+                  className="w-full px-4 py-3 rounded-xl bg-[#FAFAFC] border border-slate-300 text-slate-900 text-xs font-medium focus:outline-none focus:border-[#0067FF]"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Action Button Text</label>
+                  <input
+                    type="text"
+                    value={formData.popup_button_text || ''}
+                    onChange={(e) => setFormData({ ...formData, popup_button_text: e.target.value })}
+                    placeholder="Reserve My Free Seat"
+                    className="w-full px-4 py-3 rounded-xl bg-[#FAFAFC] border border-slate-300 text-slate-900 font-bold text-xs focus:outline-none focus:border-[#0067FF]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Registration Link / WhatsApp URL</label>
+                  <input
+                    type="text"
+                    value={formData.popup_button_url || ''}
+                    onChange={(e) => setFormData({ ...formData, popup_button_url: e.target.value })}
+                    placeholder="https://wa.me/918591928362..."
+                    className="w-full px-4 py-3 rounded-xl bg-[#FAFAFC] border border-slate-300 text-slate-900 font-bold text-xs focus:outline-none focus:border-[#0067FF]"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={isSaving}
+              className="w-full py-4 rounded-xl bg-[#0067FF] hover:bg-[#0052CC] text-white font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-[#0067FF]/20 transition-all active:scale-95"
+            >
+              {isSaving ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+              <span>Save & Publish Live Popup</span>
+            </button>
+          </form>
+        )}
+
+        {/* Tab 5: Hiring Partners Manager */}
+        {activeTab === 'partners' && (
+          <form onSubmit={handleSave} className="p-8 rounded-3xl bg-white border border-slate-200 shadow-xl space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-xl font-extrabold text-slate-900 flex items-center gap-2">
+                  <Building2 className="w-5 h-5 text-emerald-600" />
+                  <span>Hiring Partners & Salary Hike Manager ({partnerList.length})</span>
+                </h3>
+                <p className="text-xs text-slate-500 mt-1">Manage partner companies, salary hike tags, and placement packages featured on the homepage.</p>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleAddPartner}
+                className="px-4 py-2 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-bold flex items-center gap-1.5 hover:bg-emerald-100 transition-all"
+              >
+                <Plus className="w-4 h-4" />
+                <span>Add Partner</span>
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {partnerList.map((company, idx) => (
+                <div key={idx} className="p-5 rounded-2xl bg-[#FAFAFC] border border-slate-200 space-y-3 relative">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-mono font-bold text-emerald-700">Company #{idx + 1}</span>
+                    <button
+                      type="button"
+                      onClick={() => handleRemovePartner(idx)}
+                      className="p-1.5 rounded-lg text-rose-600 hover:bg-rose-50 border border-transparent hover:border-rose-200 transition-all"
+                      title="Remove Company"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-600 mb-1">Company Name</label>
+                    <input
+                      type="text"
+                      value={company.name}
+                      onChange={(e) => handleUpdatePartner(idx, 'name', e.target.value)}
+                      className="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 font-bold text-xs text-slate-900"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-600 mb-1">Salary Hike Tag</label>
+                      <input
+                        type="text"
+                        value={company.hike}
+                        onChange={(e) => handleUpdatePartner(idx, 'hike', e.target.value)}
+                        placeholder="+70% Hike"
+                        className="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 font-bold text-xs text-emerald-700"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-600 mb-1">Salary Package</label>
+                      <input
+                        type="text"
+                        value={company.package}
+                        onChange={(e) => handleUpdatePartner(idx, 'package', e.target.value)}
+                        placeholder="₹7.0 - ₹9.0 LPA"
+                        className="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 font-mono text-xs text-slate-800"
+                      />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <button
+              type="submit"
+              disabled={isSaving}
+              className="w-full py-4 rounded-xl bg-[#0067FF] hover:bg-[#0052CC] text-white font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-[#0067FF]/20 transition-all active:scale-95"
+            >
+              {isSaving ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+              <span>Save Hiring Partners Wall</span>
+            </button>
+          </form>
+        )}
+
+        {/* Tab 6: FAQ Manager */}
         {activeTab === 'faqs' && (
           <form onSubmit={handleSave} className="p-8 rounded-3xl bg-white border border-slate-200 shadow-xl space-y-6">
             <div className="flex items-center justify-between">
@@ -556,7 +808,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
           </form>
         )}
 
-        {/* Tab 5: Testimonials Manager */}
+        {/* Tab 7: Testimonials Manager */}
         {activeTab === 'testimonials' && (
           <form onSubmit={handleSave} className="p-8 rounded-3xl bg-white border border-slate-200 shadow-xl space-y-6">
             <div className="flex items-center justify-between">
@@ -646,11 +898,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
           </form>
         )}
 
-        {/* Tab 6: Contact & WhatsApp Settings */}
+        {/* Tab 8: Contact & WhatsApp Settings */}
         {activeTab === 'contact' && (
           <form onSubmit={handleSave} className="p-8 rounded-3xl bg-white border border-slate-200 shadow-xl space-y-6 max-w-2xl">
             <h3 className="text-xl font-extrabold text-slate-900 flex items-center gap-2">
-              <Phone className="w-5 h-5 text-emerald-600" />
+              <Phone className="w-5 h-5 text-teal-600" />
               <span>WhatsApp & Support Contact Details</span>
             </h3>
 
@@ -689,7 +941,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
           </form>
         )}
 
-        {/* Tab 7: Leadership Settings */}
+        {/* Tab 9: Leadership Settings */}
         {activeTab === 'founder' && (
           <form onSubmit={handleSave} className="p-8 rounded-3xl bg-white border border-slate-200 shadow-xl space-y-6 max-w-2xl">
             <h3 className="text-xl font-extrabold text-slate-900 flex items-center gap-2">
@@ -742,7 +994,40 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
           </form>
         )}
 
-        {/* Tab 8: Brochure Leads Table & 1-Click WhatsApp CRM */}
+        {/* Tab 10: Custom Security Passcode Settings */}
+        {activeTab === 'security' && (
+          <form onSubmit={handleSave} className="p-8 rounded-3xl bg-white border border-slate-200 shadow-xl space-y-6 max-w-2xl">
+            <h3 className="text-xl font-extrabold text-slate-900 flex items-center gap-2">
+              <KeyRound className="w-5 h-5 text-rose-600" />
+              <span>Admin Login Passcode Security</span>
+            </h3>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Custom Secret Passcode / PIN</label>
+                <input
+                  type="text"
+                  value={formData.admin_passcode || 'mandar123'}
+                  onChange={(e) => setFormData({ ...formData, admin_passcode: e.target.value })}
+                  placeholder="Enter new admin passcode..."
+                  className="w-full px-4 py-3 rounded-xl bg-[#FAFAFC] border border-slate-300 text-slate-900 font-bold text-sm focus:outline-none focus:border-[#0067FF]"
+                />
+                <p className="text-[11px] text-slate-500 mt-1">This secret key will be required to log into the Admin Dashboard (`/admin`).</p>
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={isSaving}
+              className="w-full py-4 rounded-xl bg-[#0067FF] hover:bg-[#0052CC] text-white font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-[#0067FF]/20 transition-all active:scale-95"
+            >
+              {isSaving ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+              <span>Save Secret Admin Passcode</span>
+            </button>
+          </form>
+        )}
+
+        {/* Tab 11: Brochure Leads Table & 1-Click WhatsApp CRM */}
         {activeTab === 'leads' && (
           <div className="p-8 rounded-3xl bg-white border border-slate-200 shadow-xl space-y-6">
             <div className="flex items-center justify-between">

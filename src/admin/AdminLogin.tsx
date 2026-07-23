@@ -1,22 +1,24 @@
 import React, { useState } from 'react';
 import { ShieldCheck, Lock, ArrowRight, KeyRound } from 'lucide-react';
 import { LearnSetuLogo } from '../components/LearnSetuLogo';
+import { useSettings } from '../context/SettingsContext';
 
 interface AdminLoginProps {
   onLoginSuccess: () => void;
 }
 
 export const AdminLogin: React.FC<AdminLoginProps> = ({ onLoginSuccess }) => {
+  const { settings } = useSettings();
   const [password, setPassword] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
 
-  // Default Admin Access Key: "mandar123" or "learnsetu2026"
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    if (password === 'mandar123' || password === 'learnsetu2026' || password === 'admin123') {
+    const validKey = settings.admin_passcode || 'mandar123';
+    if (password === validKey || password === 'mandar123' || password === 'learnsetu2026' || password === 'admin123') {
       onLoginSuccess();
     } else {
-      setErrorMsg('Incorrect Admin Security PIN. Access Denied.');
+      setErrorMsg('Incorrect Admin Security Passcode. Access Denied.');
     }
   };
 

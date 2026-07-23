@@ -28,6 +28,14 @@ export interface SiteSettings {
   brochure_pdf_url?: string;
   custom_faqs?: string;
   custom_testimonials?: string;
+  admin_passcode?: string;
+  custom_hiring_partners?: string;
+  popup_active?: boolean;
+  popup_title?: string;
+  popup_badge?: string;
+  popup_description?: string;
+  popup_button_text?: string;
+  popup_button_url?: string;
   updated_at?: string;
 }
 

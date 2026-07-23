@@ -65,7 +65,24 @@ const defaultSettings: SiteSettings = {
       review: "Coming from a non-IT background, I was skeptical. But the step-by-step SQL and ML roadmap helped me land my dream Data Science job.",
       stars: 5,
     }
-  ])
+  ]),
+  admin_passcode: 'mandar123',
+  custom_hiring_partners: JSON.stringify([
+    { name: 'TCS', hike: '+65% Hike', package: '₹6.5 - ₹8.0 LPA' },
+    { name: 'Infosys', hike: '+70% Hike', package: '₹7.0 - ₹9.5 LPA' },
+    { name: 'Wipro', hike: '+68% Hike', package: '₹6.8 - ₹8.5 LPA' },
+    { name: 'Accenture', hike: '+75% Hike', package: '₹8.0 - ₹11.0 LPA' },
+    { name: 'Cognizant', hike: '+72% Hike', package: '₹7.5 - ₹10.0 LPA' },
+    { name: 'Capgemini', hike: '+70% Hike', package: '₹7.0 - ₹9.0 LPA' },
+    { name: 'IBM', hike: '+80% Hike', package: '₹9.5 - ₹12.0 LPA' },
+    { name: 'StartTech', hike: '+70% Hike', package: '₹7.0 - ₹9.0 LPA' }
+  ]),
+  popup_active: false,
+  popup_title: '⚡ Free Live Masterclass: Build Your First LLM Application',
+  popup_badge: 'SPECIAL LIVE SESSION THIS SATURDAY',
+  popup_description: 'Join Sagar Parmar live to learn how to build production AI applications with Python & OpenAI. Limited free seats available!',
+  popup_button_text: 'Reserve My Free Seat',
+  popup_button_url: 'https://wa.me/918591928362?text=Hi%20Team%20Learnsetu%2C%20I%20want%20to%20register%20for%20the%20Free%20Live%20Masterclass.'
 };
 
 interface SettingsContextType {
@@ -208,7 +225,15 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           announcement_button_url: updated.announcement_button_url,
           announcement_theme: updated.announcement_theme,
           custom_faqs: updated.custom_faqs,
-          custom_testimonials: updated.custom_testimonials
+          custom_testimonials: updated.custom_testimonials,
+          admin_passcode: updated.admin_passcode,
+          custom_hiring_partners: updated.custom_hiring_partners,
+          popup_active: updated.popup_active,
+          popup_title: updated.popup_title,
+          popup_badge: updated.popup_badge,
+          popup_description: updated.popup_description,
+          popup_button_text: updated.popup_button_text,
+          popup_button_url: updated.popup_button_url
         }),
         updated_at: updated.updated_at
       };

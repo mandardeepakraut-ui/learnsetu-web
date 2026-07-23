@@ -14,6 +14,7 @@ import { MentorshipGrid } from './components/MentorshipGrid';
 import { Testimonials } from './components/Testimonials';
 import { FaqSection } from './components/FaqSection';
 import { BrochureModal } from './components/BrochureModal';
+import { WebinarPopupModal } from './components/WebinarPopupModal';
 import { Footer } from './components/Footer';
 import { AdminLogin } from './admin/AdminLogin';
 import { AdminDashboard } from './admin/AdminDashboard';
@@ -103,6 +104,8 @@ const MainSiteContent: React.FC = () => {
         isOpen={brochureOpen}
         onClose={() => setBrochureOpen(false)}
       />
+
+      <WebinarPopupModal />
     </div>
   );
 };

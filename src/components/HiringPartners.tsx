@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Building2 } from 'lucide-react';
+import { useSettings } from '../context/SettingsContext';
 import tcsImg from '../assets/companies/TCS.jpg';
 import infosysImg from '../assets/companies/INFOSYS.jpg';
 import wiproImg from '../assets/companies/WIPRO.jpg';
@@ -11,82 +12,52 @@ import startechImg from '../assets/companies/STARTECH.jpg';
 
 interface CompanyLogo {
   name: string;
-  imgSrc: string;
-  fallbackSrc: string;
+  imgSrc?: string;
+  fallbackSrc?: string;
   avgPackage: string;
   hike: string;
   scaleClass?: string;
 }
 
+const defaultImageMap: Record<string, { imgSrc: string; fallbackSrc: string; scaleClass?: string }> = {
+  'TCS': { imgSrc: tcsImg, fallbackSrc: '/companies/TCS.jpg', scaleClass: 'scale-125 max-h-12' },
+  'Infosys': { imgSrc: infosysImg, fallbackSrc: '/companies/INFOSYS.jpg', scaleClass: 'max-h-10' },
+  'Wipro': { imgSrc: wiproImg, fallbackSrc: '/companies/WIPRO.jpg', scaleClass: 'max-h-10' },
+  'Accenture': { imgSrc: accentureImg, fallbackSrc: '/companies/ACCENTURE.jpg', scaleClass: 'max-h-10' },
+  'Cognizant': { imgSrc: cognizantImg, fallbackSrc: '/companies/COGNIZANT.jpg', scaleClass: 'max-h-10' },
+  'Capgemini': { imgSrc: capgeminiImg, fallbackSrc: '/companies/CAPGEMINI.jpg', scaleClass: 'max-h-10' },
+  'IBM': { imgSrc: ibmImg, fallbackSrc: '/companies/IBM.jpg', scaleClass: 'max-h-10' },
+  'StartTech': { imgSrc: startechImg, fallbackSrc: '/companies/STARTECH.jpg', scaleClass: 'scale-125 max-h-12' },
+};
+
 export const HiringPartners: React.FC = () => {
+  const { settings } = useSettings();
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
 
-  const companies: CompanyLogo[] = [
-    {
-      name: 'TCS',
-      imgSrc: tcsImg,
-      fallbackSrc: '/companies/TCS.jpg',
-      avgPackage: '₹6.5 - ₹8.0 LPA',
-      hike: '+65% Hike',
-      scaleClass: 'scale-125 max-h-12'
-    },
-    {
-      name: 'Infosys',
-      imgSrc: infosysImg,
-      fallbackSrc: '/companies/INFOSYS.jpg',
-      avgPackage: '₹7.0 - ₹9.5 LPA',
-      hike: '+70% Hike',
-      scaleClass: 'max-h-10'
-    },
-    {
-      name: 'Wipro',
-      imgSrc: wiproImg,
-      fallbackSrc: '/companies/WIPRO.jpg',
-      avgPackage: '₹6.8 - ₹8.5 LPA',
-      hike: '+68% Hike',
-      scaleClass: 'max-h-10'
-    },
-    {
-      name: 'Accenture',
-      imgSrc: accentureImg,
-      fallbackSrc: '/companies/ACCENTURE.jpg',
-      avgPackage: '₹8.0 - ₹11.0 LPA',
-      hike: '+75% Hike',
-      scaleClass: 'max-h-10'
-    },
-    {
-      name: 'Cognizant',
-      imgSrc: cognizantImg,
-      fallbackSrc: '/companies/COGNIZANT.jpg',
-      avgPackage: '₹7.2 - ₹9.8 LPA',
-      hike: '+72% Hike',
-      scaleClass: 'max-h-10'
-    },
-    {
-      name: 'Capgemini',
-      imgSrc: capgeminiImg,
-      fallbackSrc: '/companies/CAPGEMINI.jpg',
-      avgPackage: '₹7.5 - ₹10.2 LPA',
-      hike: '+75% Hike',
-      scaleClass: 'max-h-10'
-    },
-    {
-      name: 'IBM',
-      imgSrc: ibmImg,
-      fallbackSrc: '/companies/IBM.jpg',
-      avgPackage: '₹8.5 - ₹12.0 LPA',
-      hike: '+80% Hike',
-      scaleClass: 'max-h-10'
-    },
-    {
-      name: 'StartTech',
-      imgSrc: startechImg,
-      fallbackSrc: '/companies/STARTECH.jpg',
-      avgPackage: '₹7.0 - ₹9.0 LPA',
-      hike: '+70% Hike',
-      scaleClass: 'scale-125 max-h-12'
-    }
+  const defaultCompanies: CompanyLogo[] = [
+    { name: 'TCS', avgPackage: '₹6.5 - ₹8.0 LPA', hike: '+65% Hike' },
+    { name: 'Infosys', avgPackage: '₹7.0 - ₹9.5 LPA', hike: '+70% Hike' },
+    { name: 'Wipro', avgPackage: '₹6.8 - ₹8.5 LPA', hike: '+68% Hike' },
+    { name: 'Accenture', avgPackage: '₹8.0 - ₹11.0 LPA', hike: '+75% Hike' },
+    { name: 'Cognizant', avgPackage: '₹7.2 - ₹9.8 LPA', hike: '+72% Hike' },
+    { name: 'Capgemini', avgPackage: '₹7.5 - ₹10.2 LPA', hike: '+75% Hike' },
+    { name: 'IBM', avgPackage: '₹8.5 - ₹12.0 LPA', hike: '+80% Hike' },
+    { name: 'StartTech', avgPackage: '₹7.0 - ₹9.0 LPA', hike: '+70% Hike' }
   ];
+
+  let companies = defaultCompanies;
+  if (settings.custom_hiring_partners) {
+    try {
+      const parsed = JSON.parse(settings.custom_hiring_partners);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        companies = parsed.map((item: any) => ({
+          name: item.name || 'Partner',
+          avgPackage: item.package || '₹7.0 - ₹9.0 LPA',
+          hike: item.hike || '+70% Hike'
+        }));
+      }
+    } catch (e) {}
+  }
 
   return (
     <section className="py-14 bg-white border-y border-slate-200/80 overflow-hidden">
@@ -102,6 +73,11 @@ export const HiringPartners: React.FC = () => {
         <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-4">
           {companies.map((company, idx) => {
             const isHovered = hoveredIdx === idx;
+            const assetInfo = defaultImageMap[company.name] || {
+              imgSrc: `/companies/${company.name.toUpperCase()}.jpg`,
+              fallbackSrc: `/companies/${company.name.toUpperCase()}.jpg`
+            };
+
             return (
               <div
                 key={idx}
@@ -113,18 +89,29 @@ export const HiringPartners: React.FC = () => {
                     : 'border-slate-200/80 hover:border-slate-300'
                 }`}
               >
-                {/* Official High-Resolution Logo Image */}
+                {/* Official Logo Image or Text Badge Fallback */}
                 <div className="w-full h-12 flex items-center justify-center p-1 transition-transform duration-300 group-hover:scale-105">
-                  <img
-                    src={company.imgSrc}
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).src = company.fallbackSrc;
-                    }}
-                    alt={`${company.name} Official Logo`}
-                    className={`max-w-full object-contain filter contrast-110 transition-all ${
-                      company.scaleClass || 'max-h-10'
-                    }`}
-                  />
+                  {assetInfo.imgSrc ? (
+                    <img
+                      src={assetInfo.imgSrc}
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).style.display = 'none';
+                        const parent = (e.target as HTMLElement).parentElement;
+                        if (parent && !parent.querySelector('.text-fallback')) {
+                          const txt = document.createElement('span');
+                          txt.className = 'text-fallback text-xs font-extrabold font-mono text-slate-800';
+                          txt.innerText = company.name;
+                          parent.appendChild(txt);
+                        }
+                      }}
+                      alt={`${company.name} Official Logo`}
+                      className={`max-w-full object-contain filter contrast-110 transition-all ${
+                        assetInfo.scaleClass || 'max-h-10'
+                      }`}
+                    />
+                  ) : (
+                    <span className="text-xs font-extrabold font-mono text-slate-800">{company.name}</span>
+                  )}
                 </div>
 
                 {/* Interactive Tooltip Card on Hover */}
