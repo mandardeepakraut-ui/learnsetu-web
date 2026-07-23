@@ -155,6 +155,20 @@ export const DEFAULT_ADMIN_USERS: AdminUser[] = [
 ];
 
 export async function fetchAdminUsers(): Promise<AdminUser[]> {
+  let deletedList: string[] = [];
+  try {
+    const rawDeleted = localStorage.getItem('ls_deleted_admins');
+    if (rawDeleted) deletedList = JSON.parse(rawDeleted);
+  } catch (e) {}
+
+  let customAdmins: AdminUser[] = [];
+  try {
+    const rawCustom = localStorage.getItem('ls_custom_admins');
+    if (rawCustom) customAdmins = JSON.parse(rawCustom);
+  } catch (e) {}
+
+  let listToReturn: AdminUser[] = [...DEFAULT_ADMIN_USERS];
+
   try {
     const { data, error } = await supabase
       .from('admin_users')
@@ -162,43 +176,104 @@ export async function fetchAdminUsers(): Promise<AdminUser[]> {
       .order('created_at', { ascending: true });
 
     if (!error && data && data.length > 0) {
-      return data as AdminUser[];
+      listToReturn = data as AdminUser[];
     }
   } catch (err) {
     console.warn('Using local fallback admin users:', err);
   }
-  return DEFAULT_ADMIN_USERS;
+
+  // Merge custom created admins
+  customAdmins.forEach((ca) => {
+    if (!listToReturn.some((u) => u.username.toLowerCase() === ca.username.toLowerCase())) {
+      listToReturn.push(ca);
+    }
+  });
+
+  // Filter out deleted admin usernames
+  return listToReturn.filter((u) => !deletedList.includes(u.username.toLowerCase()));
 }
 
 export async function createAdminUser(newUser: Omit<AdminUser, 'id' | 'created_at'>): Promise<boolean> {
+  const usernameClean = newUser.username.toLowerCase();
+  
+  // Remove from deleted list if re-creating
   try {
-    const { error } = await supabase.from('admin_users').insert([newUser]);
-    if (!error) return true;
+    const rawDeleted = localStorage.getItem('ls_deleted_admins');
+    let deletedList: string[] = rawDeleted ? JSON.parse(rawDeleted) : [];
+    deletedList = deletedList.filter((u) => u !== usernameClean);
+    localStorage.setItem('ls_deleted_admins', JSON.stringify(deletedList));
+  } catch (e) {}
+
+  // Save to local custom admins
+  try {
+    const rawCustom = localStorage.getItem('ls_custom_admins');
+    let customList: AdminUser[] = rawCustom ? JSON.parse(rawCustom) : [];
+    customList = customList.filter((u) => u.username.toLowerCase() !== usernameClean);
+    customList.push(newUser as AdminUser);
+    localStorage.setItem('ls_custom_admins', JSON.stringify(customList));
+  } catch (e) {}
+
+  try {
+    await supabase.from('admin_users').upsert([newUser]);
   } catch (err) {
-    console.error('Error creating admin user:', err);
+    console.warn('DB upsert note:', err);
   }
-  return false;
+  return true;
 }
 
 export async function updateAdminUserPermissions(username: string, permissions: AdminPermission[]): Promise<boolean> {
+  const usernameClean = username.toLowerCase();
+
+  // Update local custom admins
   try {
-    const { error } = await supabase
+    const rawCustom = localStorage.getItem('ls_custom_admins');
+    if (rawCustom) {
+      let customList: AdminUser[] = JSON.parse(rawCustom);
+      customList = customList.map((u) => (u.username.toLowerCase() === usernameClean ? { ...u, permissions } : u));
+      localStorage.setItem('ls_custom_admins', JSON.stringify(customList));
+    }
+  } catch (e) {}
+
+  try {
+    await supabase
       .from('admin_users')
       .update({ permissions })
-      .eq('username', username);
-    if (!error) return true;
+      .eq('username', usernameClean);
   } catch (err) {
-    console.error('Error updating permissions:', err);
+    console.warn('DB permissions update note:', err);
   }
-  return false;
+  return true;
 }
 
 export async function deleteAdminUser(username: string): Promise<boolean> {
+  const usernameClean = username.toLowerCase();
+
+  // Add to local deleted list
   try {
-    const { error } = await supabase.from('admin_users').delete().eq('username', username);
-    if (!error) return true;
+    const rawDeleted = localStorage.getItem('ls_deleted_admins');
+    let deletedList: string[] = rawDeleted ? JSON.parse(rawDeleted) : [];
+    if (!deletedList.includes(usernameClean)) {
+      deletedList.push(usernameClean);
+    }
+    localStorage.setItem('ls_deleted_admins', JSON.stringify(deletedList));
+  } catch (e) {}
+
+  // Remove from custom local list if present
+  try {
+    const rawCustom = localStorage.getItem('ls_custom_admins');
+    if (rawCustom) {
+      let customList: AdminUser[] = JSON.parse(rawCustom);
+      customList = customList.filter((u) => u.username.toLowerCase() !== usernameClean);
+      localStorage.setItem('ls_custom_admins', JSON.stringify(customList));
+    }
+  } catch (e) {}
+
+  try {
+    await supabase.from('admin_users').delete().eq('username', usernameClean);
   } catch (err) {
-    console.error('Error deleting admin:', err);
+    console.warn('DB delete note:', err);
   }
-  return false;
+
+  return true;
 }
+

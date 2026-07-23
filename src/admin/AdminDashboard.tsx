@@ -138,12 +138,18 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   };
 
   const handleDeleteAdminAccount = async (username: string) => {
-    if (username === 'mandar' || username === currentAdmin.username) {
+    const targetClean = username.toLowerCase();
+    const currentClean = currentAdmin.username.toLowerCase();
+
+    if (targetClean === 'mandar' || targetClean === currentClean) {
       alert("Cannot delete primary founder or currently logged-in account!");
       return;
     }
 
     if (confirm(`Are you sure you want to delete admin account @${username}?`)) {
+      // Optimistic state update
+      setAdminList((prev) => prev.filter((u) => u.username.toLowerCase() !== targetClean));
+
       const ok = await deleteAdminUser(username);
       if (ok) {
         logAuditActivity(
@@ -152,7 +158,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           'DELETE_ADMIN',
           `Deleted admin account @${username}`
         );
-        loadAdminUsersList();
       }
     }
   };
