@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { BookOpen, Check, ChevronDown, Clock, Calendar, Trophy, Award, ArrowUpRight } from 'lucide-react';
+import { useSettings } from '../context/SettingsContext';
 
 interface CourseShowcaseProps {
   onOpenBrochure: () => void;
@@ -7,9 +8,10 @@ interface CourseShowcaseProps {
 }
 
 export const CourseShowcase: React.FC<CourseShowcaseProps> = ({ onOpenBrochure, onSelectCourse }) => {
+  const { settings } = useSettings();
   const [openModuleIndex, setOpenModuleIndex] = useState<number | null>(0);
 
-  const whatsappEnrollUrl = "https://wa.me/918591928362?text=Hi%20LearnSetu%20Team%2C%20I%20want%20to%20enroll%20in%20the%20Master%20Program%20in%20Data%20Science%20%26%20AI%20(%E2%82%B914%2C999%20Fee%20%2F%2012-Month%20EMI).%20Please%20guide%20me%20with%20the%20registration%20and%20batch%20details.";
+  const whatsappEnrollUrl = `https://wa.me/${settings.whatsapp_number}?text=Hi%20LearnSetu%20Team%2C%20I%20want%20to%20enroll%20in%20the%20Master%20Program%20in%20Data%20Science%20%26%20AI%20(${encodeURIComponent(settings.course_fee)}%20Fee%20%2F%2012-Month%20EMI).%20Please%20guide%20me%20with%20the%20registration%20and%20batch%20details.`;
 
   const modules = [
     {
@@ -106,10 +108,10 @@ export const CourseShowcase: React.FC<CourseShowcaseProps> = ({ onOpenBrochure, 
             <div className="p-5 rounded-2xl bg-[#FAFAFC] border border-[#0067FF]/30">
               <div className="text-xs text-slate-500 font-mono uppercase tracking-wider font-bold">Total Investment</div>
               <div className="flex items-baseline gap-3 mt-1">
-                <span className="text-4xl font-extrabold font-mono text-slate-900">₹14,999</span>
+                <span className="text-4xl font-extrabold font-mono text-slate-900">{settings.course_fee}</span>
                 <span className="text-xs font-mono font-bold text-[#0067FF]">No Cost EMI</span>
               </div>
-              <p className="text-[11px] text-slate-600 mt-2">12-Month EMI starts at ₹1,250/mo. Zero hidden charges.</p>
+              <p className="text-[11px] text-slate-600 mt-2">12-Month EMI starts at {settings.emi_monthly}. Zero hidden charges.</p>
             </div>
 
             {/* Program Specs List */}
