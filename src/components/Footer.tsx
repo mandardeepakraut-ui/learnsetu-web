@@ -118,6 +118,15 @@ export const Footer: React.FC = () => {
               className="font-bold text-[#0067FF] hover:underline"
             >
               Mandar Raut
+            </a>{' '}
+            &{' '}
+            <a
+              href="https://www.linkedin.com/in/manthan-saindane-datascience/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-bold text-[#0067FF] hover:underline"
+            >
+              Manthan Saindane
             </a>
           </div>
           

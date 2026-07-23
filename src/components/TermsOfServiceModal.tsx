@@ -15,7 +15,7 @@ export const TermsOfServiceModal: React.FC<TermsOfServiceModalProps> = ({ isOpen
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md animate-fadeIn">
       <div className="relative w-full max-w-2xl max-h-[85vh] bg-white rounded-3xl border border-slate-200 shadow-2xl flex flex-col overflow-hidden">
-        
+
         {/* Header */}
         <div className="sticky top-0 z-10 bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
@@ -38,7 +38,7 @@ export const TermsOfServiceModal: React.FC<TermsOfServiceModalProps> = ({ isOpen
 
         {/* Scrollable Terms Body */}
         <div className="p-6 overflow-y-auto space-y-6 text-xs text-slate-600 leading-relaxed font-medium">
-          
+
           <section className="space-y-2">
             <h4 className="text-sm font-bold text-slate-900 font-display flex items-center gap-2">
               <Award className="w-4 h-4 text-[#0067FF]" />
