@@ -21,6 +21,9 @@ const defaultSettings: SiteSettings = {
   announcement_button_url: '#master-course',
   announcement_theme: 'blue',
   brochure_pdf_url: '/LearnSetu-Data-science-and-ai-Brochure.pdf',
+  telegram_bot_token: '8876748642:AAHpCIg5q2kquP-n6Qq60k-A2VcRkMPY5uI',
+  telegram_chat_id: '6124204757',
+  telegram_alerts_enabled: true,
   custom_faqs: JSON.stringify([
     {
       q: "What is the total fee for the Master Program in Data Science & AI?",
