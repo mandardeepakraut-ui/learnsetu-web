@@ -139,7 +139,6 @@ export const Footer: React.FC<FooterProps> = ({ onOpenDashboard }) => {
             <a href="https://www.linkedin.com/company/learnsetu/posts/?feedView=all" target="_blank" rel="noopener noreferrer" className="hover:text-[#0067FF] font-semibold transition-colors">LinkedIn</a>
             <button onClick={() => setPrivacyOpen(true)} className="hover:text-slate-900 font-semibold transition-colors">Privacy Policy</button>
             <button onClick={() => setTermsOpen(true)} className="hover:text-slate-900 font-semibold transition-colors">Terms of Service</button>
-            <a href="#admin" className="hover:text-[#0067FF] font-semibold transition-colors text-slate-400">Admin Portal</a>
           </div>
         </div>
 
