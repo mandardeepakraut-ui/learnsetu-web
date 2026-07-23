@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { X, Download, CheckCircle, FileText, ShieldCheck } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { supabase } from '../lib/supabase';
+import { sendTelegramNewLeadAlert } from '../lib/telegramAlerts';
+import { PersonalizedBrochureView } from './PersonalizedBrochureView';
 
 interface BrochureModalProps {
   isOpen: boolean;
@@ -50,6 +52,16 @@ export const BrochureModal: React.FC<BrochureModalProps> = ({ isOpen, onClose })
     e.preventDefault();
     triggerPdfDownload();
     saveLeadToSupabase();
+
+    // Trigger Instant Telegram Lead Alert
+    sendTelegramNewLeadAlert({
+      firstName: formData.firstName,
+      lastName: formData.lastName,
+      email: formData.email,
+      phone: formData.phone,
+      program: formData.program,
+    });
+
     setSubmitted(true);
     confetti({
       particleCount: 120,
@@ -60,7 +72,7 @@ export const BrochureModal: React.FC<BrochureModalProps> = ({ isOpen, onClose })
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md animate-fadeIn">
-      <div className="relative w-full max-w-lg bg-white p-8 rounded-3xl border border-slate-200 shadow-2xl shadow-slate-900/20 overflow-hidden">
+      <div className={`relative w-full ${submitted ? 'max-w-4xl max-h-[90vh] overflow-y-auto p-4' : 'max-w-lg p-8'} bg-white rounded-3xl border border-slate-200 shadow-2xl shadow-slate-900/20 transition-all`}>
         
         {/* Close Button */}
         <button
@@ -163,34 +175,18 @@ export const BrochureModal: React.FC<BrochureModalProps> = ({ isOpen, onClose })
             </form>
           </div>
         ) : (
-          <div className="text-center py-8 space-y-4">
-            <div className="w-16 h-16 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-200 flex items-center justify-center mx-auto">
-              <CheckCircle className="w-8 h-8" />
-            </div>
-            <h3 className="text-2xl font-bold text-slate-900">Brochure Downloaded!</h3>
-            <p className="text-xs text-slate-600 max-w-xs mx-auto">
-              Thank you {formData.firstName}! The official brochure PDF (LearnSetu-Data-science-and-ai-Brochure.pdf) has been downloaded to your device.
-            </p>
-
-            <div className="pt-2 flex flex-col gap-2">
-              <a
-                href="/LearnSetu-Data-science-and-ai-Brochure.pdf"
-                download="LearnSetu-Data-science-and-ai-Brochure.pdf"
-                className="w-full py-3 rounded-xl bg-[#0067FF] hover:bg-[#0052CC] text-white font-bold text-xs flex items-center justify-center gap-2 transition-all shadow-md shadow-[#0067FF]/20"
-              >
-                <FileText className="w-4 h-4" />
-                <span>Re-Download PDF Brochure</span>
-              </a>
-              <button
-                onClick={() => {
-                  setSubmitted(false);
-                  onClose();
-                }}
-                className="w-full py-2.5 rounded-xl bg-slate-100 text-slate-800 font-bold text-xs border border-slate-200 hover:bg-slate-200 transition-all"
-              >
-                Close & Return to Site
-              </button>
-            </div>
+          <div className="space-y-4">
+            <PersonalizedBrochureView
+              firstName={formData.firstName}
+              lastName={formData.lastName}
+              email={formData.email}
+              phone={formData.phone}
+              program={formData.program}
+              onClose={() => {
+                setSubmitted(false);
+                onClose();
+              }}
+            />
           </div>
         )}
 
