@@ -1,10 +1,15 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { MessageCircle, Mail, Instagram, Linkedin } from 'lucide-react';
 import { LearnSetuLogo } from './LearnSetuLogo';
 import { useSettings } from '../context/SettingsContext';
+import { PrivacyPolicyModal } from './PrivacyPolicyModal';
+import { TermsOfServiceModal } from './TermsOfServiceModal';
 
 export const Footer: React.FC = () => {
   const { settings } = useSettings();
+  const [privacyOpen, setPrivacyOpen] = useState(false);
+  const [termsOpen, setTermsOpen] = useState(false);
+
   return (
     <footer className="bg-white border-t border-slate-200/80 pt-16 pb-12 text-xs text-slate-600">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -119,12 +124,15 @@ export const Footer: React.FC = () => {
           <div className="flex items-center gap-6">
             <a href="https://www.instagram.com/learnsetu.in/" target="_blank" rel="noopener noreferrer" className="hover:text-pink-600 font-semibold transition-colors">Instagram</a>
             <a href="https://www.linkedin.com/company/learnsetu/posts/?feedView=all" target="_blank" rel="noopener noreferrer" className="hover:text-[#0067FF] font-semibold transition-colors">LinkedIn</a>
-            <a href="#" className="hover:text-slate-900">Privacy Policy</a>
-            <a href="#" className="hover:text-slate-900">Terms of Service</a>
+            <button onClick={() => setPrivacyOpen(true)} className="hover:text-slate-900 font-semibold transition-colors">Privacy Policy</button>
+            <button onClick={() => setTermsOpen(true)} className="hover:text-slate-900 font-semibold transition-colors">Terms of Service</button>
           </div>
         </div>
 
       </div>
+
+      <PrivacyPolicyModal isOpen={privacyOpen} onClose={() => setPrivacyOpen(false)} />
+      <TermsOfServiceModal isOpen={termsOpen} onClose={() => setTermsOpen(false)} />
     </footer>
   );
 };
