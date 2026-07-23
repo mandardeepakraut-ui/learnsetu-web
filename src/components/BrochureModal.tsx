@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Download, CheckCircle, FileText } from 'lucide-react';
+import { X, Download, CheckCircle, FileText, ShieldCheck } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { supabase } from '../lib/supabase';
 
@@ -155,6 +155,10 @@ export const BrochureModal: React.FC<BrochureModalProps> = ({ isOpen, onClose })
                   <Download className="w-4 h-4" />
                   <span>Download PDF Brochure Instantly</span>
                 </button>
+                <div className="mt-3 text-[10px] text-slate-400 font-mono flex items-center justify-center gap-1.5">
+                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                  <span>256-BIT SSL ENCRYPTED • 100% PRIVACY PROTECTED</span>
+                </div>
               </div>
             </form>
           </div>

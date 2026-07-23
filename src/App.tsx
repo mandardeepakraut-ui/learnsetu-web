@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { SettingsProvider, useSettings } from './context/SettingsContext';
+import { SeoHead } from './components/SeoHead';
 import { Navbar } from './components/Navbar';
 import { Hero } from './components/Hero';
 import { HiringPartners } from './components/HiringPartners';
@@ -59,6 +60,7 @@ const MainSiteContent: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#FAFAFC] text-[#0F172A] flex flex-col font-body selection:bg-[#0067FF] selection:text-white">
+      <SeoHead />
       <Navbar onOpenBrochure={() => setBrochureOpen(true)} />
 
       <main className="flex-1">

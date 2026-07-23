@@ -1,5 +1,5 @@
 import React from 'react';
-import { Star, Quote, Building2, TrendingUp } from 'lucide-react';
+import { Star, Quote, Building2, TrendingUp, ShieldCheck } from 'lucide-react';
 import { useSettings } from '../context/SettingsContext';
 
 export const Testimonials: React.FC = () => {
@@ -81,8 +81,14 @@ export const Testimonials: React.FC = () => {
 
               <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
                 <div>
-                  <h4 className="text-sm font-bold text-slate-900">{rev.name}</h4>
-                  <p className="text-[11px] text-slate-500 font-mono">{rev.role}</p>
+                  <div className="flex items-center gap-1.5">
+                    <h4 className="text-sm font-bold text-slate-900">{rev.name}</h4>
+                    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-blue-50 text-[#0067FF] text-[10px] font-mono font-bold" title="Verified LearnSetu Alumni Placement">
+                      <ShieldCheck className="w-3 h-3 text-[#0067FF]" />
+                      <span>Verified</span>
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-500 font-mono mt-0.5">{rev.role}</p>
                 </div>
                 <Building2 className="w-5 h-5 text-slate-400" />
               </div>
