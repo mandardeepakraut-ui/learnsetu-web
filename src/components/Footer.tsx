@@ -1,5 +1,5 @@
 import React from 'react';
-import { MessageCircle, Mail } from 'lucide-react';
+import { MessageCircle, Mail, Instagram, Linkedin } from 'lucide-react';
 import { LearnSetuLogo } from './LearnSetuLogo';
 
 export const Footer: React.FC = () => {
@@ -9,13 +9,39 @@ export const Footer: React.FC = () => {
         
         <div className="grid grid-cols-1 md:grid-cols-4 gap-10 pb-12 border-b border-slate-200/60">
           
-          {/* Col 1: Brand Info */}
+          {/* Col 1: Brand Info & Social Media Links */}
           <div className="space-y-4">
             <LearnSetuLogo showTagline={true} size="md" />
             <p className="text-xs leading-relaxed text-slate-600">
               Leading Online Learning Academy for Data Science & AI Mastery. Transform your tech career with expert guidance, real projects, and guaranteed placement support.
             </p>
-            <div className="text-[11px] font-mono text-slate-500 font-bold">
+            
+            {/* Social Media Links */}
+            <div className="pt-2 flex items-center gap-3">
+              <a
+                href="https://www.instagram.com/learnsetu.in/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 px-3 py-2 rounded-xl bg-pink-50 text-pink-700 font-bold border border-pink-200 hover:bg-pink-100 transition-all text-xs"
+                title="Follow LearnSetu on Instagram"
+              >
+                <Instagram className="w-4 h-4 text-pink-600" />
+                <span>Instagram</span>
+              </a>
+
+              <a
+                href="https://www.linkedin.com/company/learnsetu/posts/?feedView=all"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 px-3 py-2 rounded-xl bg-blue-50 text-[#0067FF] font-bold border border-blue-200 hover:bg-blue-100 transition-all text-xs"
+                title="Follow LearnSetu on LinkedIn"
+              >
+                <Linkedin className="w-4 h-4 text-[#0067FF]" />
+                <span>LinkedIn</span>
+              </a>
+            </div>
+
+            <div className="text-[11px] font-mono text-slate-500 font-bold pt-1">
               LEARNSETU EDUTECH LLP
             </div>
           </div>
@@ -87,10 +113,12 @@ export const Footer: React.FC = () => {
               Mandar Raut
             </a>
           </div>
+          
           <div className="flex items-center gap-6">
+            <a href="https://www.instagram.com/learnsetu.in/" target="_blank" rel="noopener noreferrer" className="hover:text-pink-600 font-semibold transition-colors">Instagram</a>
+            <a href="https://www.linkedin.com/company/learnsetu/posts/?feedView=all" target="_blank" rel="noopener noreferrer" className="hover:text-[#0067FF] font-semibold transition-colors">LinkedIn</a>
             <a href="#" className="hover:text-slate-900">Privacy Policy</a>
             <a href="#" className="hover:text-slate-900">Terms of Service</a>
-            <a href="#" className="hover:text-slate-900">Placement Policy</a>
           </div>
         </div>
 
