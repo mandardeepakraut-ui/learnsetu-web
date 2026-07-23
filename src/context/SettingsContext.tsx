@@ -80,6 +80,31 @@ const SettingsContext = createContext<SettingsContextType>({
   loading: false
 });
 
+// Helper to unpack nested config inside batch_status
+const parseRowData = (row: any): SiteSettings => {
+  let extra: any = {};
+  let cleanBatchStatus = row.batch_status || defaultSettings.batch_status;
+
+  if (row.batch_status && typeof row.batch_status === 'string' && row.batch_status.trim().startsWith('{')) {
+    try {
+      const parsed = JSON.parse(row.batch_status);
+      if (parsed && typeof parsed === 'object') {
+        extra = parsed;
+        if (parsed.status) {
+          cleanBatchStatus = parsed.status;
+        }
+      }
+    } catch (e) {}
+  }
+
+  return {
+    ...defaultSettings,
+    ...extra,
+    ...row,
+    batch_status: cleanBatchStatus
+  };
+};
+
 export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [settings, setSettings] = useState<SiteSettings>(() => {
     const local = localStorage.getItem('ls_site_settings');
@@ -99,12 +124,9 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         .limit(1);
 
       if (data && data.length > 0 && !error) {
-        const latest = data[0];
-        setSettings((prev) => {
-          const merged = { ...defaultSettings, ...prev, ...latest };
-          localStorage.setItem('ls_site_settings', JSON.stringify(merged));
-          return merged;
-        });
+        const parsed = parseRowData(data[0]);
+        setSettings(parsed);
+        localStorage.setItem('ls_site_settings', JSON.stringify(parsed));
       }
     } catch (err) {
       console.log('Using local settings fallback:', err);
@@ -120,11 +142,9 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       .channel('public:site_settings')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'site_settings' }, (payload) => {
         if (payload.new) {
-          setSettings((prev) => {
-            const merged = { ...prev, ...(payload.new as SiteSettings) };
-            localStorage.setItem('ls_site_settings', JSON.stringify(merged));
-            return merged;
-          });
+          const parsed = parseRowData(payload.new);
+          setSettings(parsed);
+          localStorage.setItem('ls_site_settings', JSON.stringify(parsed));
         }
       })
       .subscribe();
@@ -153,19 +173,48 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         }
       }
 
-      const payload = existingId ? { ...updated, id: existingId } : updated;
+      // Safe DB payload with backwards-compatible schema
+      const dbPayload: Record<string, any> = {
+        course_fee: updated.course_fee,
+        emi_monthly: updated.emi_monthly,
+        whatsapp_number: updated.whatsapp_number,
+        support_email: updated.support_email,
+        founder_name: updated.founder_name,
+        founder_title: updated.founder_title,
+        founder_quote: updated.founder_quote,
+        batch_status: JSON.stringify({
+          status: updated.batch_status,
+          batch_name: updated.batch_name,
+          batch_start_date: updated.batch_start_date,
+          seats_remaining: updated.seats_remaining,
+          announcement_active: updated.announcement_active,
+          announcement_text: updated.announcement_text,
+          announcement_button_text: updated.announcement_button_text,
+          announcement_button_url: updated.announcement_button_url,
+          announcement_theme: updated.announcement_theme,
+          custom_faqs: updated.custom_faqs,
+          custom_testimonials: updated.custom_testimonials
+        }),
+        updated_at: updated.updated_at
+      };
+
+      if (existingId) {
+        dbPayload.id = existingId;
+      }
 
       const { data, error } = await supabase
         .from('site_settings')
-        .upsert(payload)
+        .upsert(dbPayload)
         .select();
 
       if (error) {
         console.error('Database update error:', error);
+        return false;
       } else if (data && data.length > 0) {
-        const fresh = { ...updated, ...data[0] };
-        setSettings(fresh);
-        localStorage.setItem('ls_site_settings', JSON.stringify(fresh));
+        const parsed = parseRowData(data[0]);
+        const finalMerged = { ...updated, ...parsed };
+        setSettings(finalMerged);
+        localStorage.setItem('ls_site_settings', JSON.stringify(finalMerged));
       }
       return true;
     } catch (err) {
