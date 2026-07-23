@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { X, Download, CheckCircle, FileText } from 'lucide-react';
 import confetti from 'canvas-confetti';
+import { supabase } from '../lib/supabase';
 
 interface BrochureModalProps {
   isOpen: boolean;
@@ -28,9 +29,27 @@ export const BrochureModal: React.FC<BrochureModalProps> = ({ isOpen, onClose })
     document.body.removeChild(link);
   };
 
+  const saveLeadToSupabase = async () => {
+    try {
+      await supabase.from('brochure_leads').insert([
+        {
+          first_name: formData.firstName,
+          last_name: formData.lastName,
+          email: formData.email,
+          phone: formData.phone,
+          program: formData.program,
+          created_at: new Date().toISOString()
+        }
+      ]);
+    } catch (err) {
+      console.log('Lead saved locally fallback');
+    }
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     triggerPdfDownload();
+    saveLeadToSupabase();
     setSubmitted(true);
     confetti({
       particleCount: 120,
@@ -62,7 +81,7 @@ export const BrochureModal: React.FC<BrochureModalProps> = ({ isOpen, onClose })
               Download Program Syllabus
             </h3>
             <p className="text-xs text-slate-600 mb-6">
-              Get the complete 24-week curriculum breakdown, project details, fee structure (₹14,999), and EMI guide downloaded directly to your device.
+              Get the complete 24-week curriculum breakdown, project details, fee structure, and EMI guide downloaded directly to your device.
             </p>
 
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -122,7 +141,7 @@ export const BrochureModal: React.FC<BrochureModalProps> = ({ isOpen, onClose })
                   onChange={(e) => setFormData({ ...formData, program: e.target.value })}
                   className="w-full px-3.5 py-2.5 rounded-xl bg-[#FAFAFC] border border-slate-300 text-slate-900 text-xs font-medium focus:outline-none focus:border-[#0067FF] focus:ring-1 focus:ring-[#0067FF] transition-colors"
                 >
-                  <option value="Master Program in Data Science & AI">Master Program in Data Science & AI (₹14,999)</option>
+                  <option value="Master Program in Data Science & AI">Master Program in Data Science & AI</option>
                   <option value="Business Analytics Essentials">Business Analytics Essentials (Launching Soon)</option>
                   <option value="Full Stack AI Engineer Program">Full Stack AI Engineer Program (In Dev)</option>
                 </select>
