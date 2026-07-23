@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowRight, Sparkles, CheckCircle2, ShieldCheck, Users, PlayCircle, FileText } from 'lucide-react';
+import { ArrowRight, Sparkles, CheckCircle2, Users, FileText } from 'lucide-react';
 import { useSettings } from '../context/SettingsContext';
 
 interface HeroProps {
@@ -26,9 +26,9 @@ export const Hero: React.FC<HeroProps> = ({ onOpenBrochure, onSelectCourse }) =>
 
         {/* Hero Title Header */}
         <div className="text-center max-w-4xl mx-auto space-y-6">
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-[#0F172A] tracking-tight leading-[1.15] font-display">
-            Master Data Science & AI. <br className="hidden sm:inline" />
-            <span className="text-[#0067FF] relative inline-block underline decoration-2 underline-offset-8">
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-slate-900 tracking-tight font-display leading-[1.15]">
+            Master Data Science & AI.{' '}
+            <span className="text-[#0067FF] font-display font-extrabold underline decoration-2 underline-offset-8">
               100% Mentored.
             </span>
           </h1>
