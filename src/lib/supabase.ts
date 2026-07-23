@@ -167,6 +167,12 @@ export async function fetchAdminUsers(): Promise<AdminUser[]> {
     if (rawCustom) customAdmins = JSON.parse(rawCustom);
   } catch (e) {}
 
+  let permOverrides: Record<string, AdminPermission[]> = {};
+  try {
+    const rawOverrides = localStorage.getItem('ls_perm_overrides');
+    if (rawOverrides) permOverrides = JSON.parse(rawOverrides);
+  } catch (e) {}
+
   let listToReturn: AdminUser[] = [...DEFAULT_ADMIN_USERS];
 
   try {
@@ -187,6 +193,15 @@ export async function fetchAdminUsers(): Promise<AdminUser[]> {
     if (!listToReturn.some((u) => u.username.toLowerCase() === ca.username.toLowerCase())) {
       listToReturn.push(ca);
     }
+  });
+
+  // Apply permission overrides
+  listToReturn = listToReturn.map((u) => {
+    const uClean = u.username.toLowerCase();
+    if (permOverrides[uClean]) {
+      return { ...u, permissions: permOverrides[uClean] };
+    }
+    return u;
   });
 
   // Filter out deleted admin usernames
@@ -213,6 +228,14 @@ export async function createAdminUser(newUser: Omit<AdminUser, 'id' | 'created_a
     localStorage.setItem('ls_custom_admins', JSON.stringify(customList));
   } catch (e) {}
 
+  // Save permission override
+  try {
+    const rawOverrides = localStorage.getItem('ls_perm_overrides');
+    let permOverrides: Record<string, AdminPermission[]> = rawOverrides ? JSON.parse(rawOverrides) : {};
+    permOverrides[usernameClean] = newUser.permissions;
+    localStorage.setItem('ls_perm_overrides', JSON.stringify(permOverrides));
+  } catch (e) {}
+
   try {
     await supabase.from('admin_users').upsert([newUser]);
   } catch (err) {
@@ -223,6 +246,14 @@ export async function createAdminUser(newUser: Omit<AdminUser, 'id' | 'created_a
 
 export async function updateAdminUserPermissions(username: string, permissions: AdminPermission[]): Promise<boolean> {
   const usernameClean = username.toLowerCase();
+
+  // Save permission overrides locally
+  try {
+    const rawOverrides = localStorage.getItem('ls_perm_overrides');
+    let permOverrides: Record<string, AdminPermission[]> = rawOverrides ? JSON.parse(rawOverrides) : {};
+    permOverrides[usernameClean] = permissions;
+    localStorage.setItem('ls_perm_overrides', JSON.stringify(permOverrides));
+  } catch (e) {}
 
   // Update local custom admins
   try {

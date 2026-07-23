@@ -110,8 +110,28 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     }
   };
 
+  const hasPerm = (p: AdminPermission): boolean => {
+    if (currentAdmin.username.toLowerCase() === 'mandar') return true;
+    if (currentAdmin.permissions?.includes('admins')) return true;
+    return currentAdmin.permissions?.includes(p) || false;
+  };
+
+  const handleSaveUserPermissions = async (username: string, permissions: AdminPermission[]) => {
+    const ok = await updateAdminUserPermissions(username, permissions);
+    if (ok) {
+      logAuditActivity(
+        currentAdmin.name,
+        currentAdmin.role,
+        'UPDATE_PERMISSIONS',
+        `Saved permissions for @${username}: [${permissions.join(', ')}]`
+      );
+      setUserMsg(`✓ Permissions for @${username} saved successfully!`);
+      setTimeout(() => setUserMsg(''), 4000);
+    }
+  };
+
   const handleTogglePermission = async (username: string, perm: AdminPermission) => {
-    const targetUser = adminList.find((u) => u.username === username);
+    const targetUser = adminList.find((u) => u.username.toLowerCase() === username.toLowerCase());
     if (!targetUser) return;
 
     let updatedPerms: AdminPermission[];
@@ -123,18 +143,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
     // Optimistic UI update
     setAdminList((prev) =>
-      prev.map((u) => (u.username === username ? { ...u, permissions: updatedPerms } : u))
+      prev.map((u) => (u.username.toLowerCase() === username.toLowerCase() ? { ...u, permissions: updatedPerms } : u))
     );
 
-    const ok = await updateAdminUserPermissions(username, updatedPerms);
-    if (ok) {
-      logAuditActivity(
-        currentAdmin.name,
-        currentAdmin.role,
-        'UPDATE_PERMISSIONS',
-        `Updated permissions for @${username}: [${updatedPerms.join(', ')}]`
-      );
-    }
+    // Save changes
+    await updateAdminUserPermissions(username, updatedPerms);
   };
 
   const handleDeleteAdminAccount = async (username: string) => {
@@ -424,173 +437,187 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
         {/* Dashboard Navigation Tabs */}
         <div className="flex flex-wrap gap-2 border-b border-slate-200 pb-4 mb-8">
-          <button
-            onClick={() => setActiveTab('traffic')}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold transition-all ${
-              activeTab === 'traffic'
-                ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/20'
-                : 'bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100'
-            }`}
-          >
-            <Activity className="w-4 h-4 text-emerald-500 animate-pulse" />
-            <span>Live Traffic & Watchers ({onlineCount})</span>
-          </button>
+          {hasPerm('traffic') && (
+            <button
+              onClick={() => setActiveTab('traffic')}
+              className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold transition-all ${
+                activeTab === 'traffic'
+                  ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/20'
+                  : 'bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100'
+              }`}
+            >
+              <Activity className="w-4 h-4 text-emerald-500 animate-pulse" />
+              <span>Live Traffic & Watchers ({onlineCount})</span>
+            </button>
+          )}
 
-          <button
-            onClick={() => setActiveTab('audit')}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold transition-all ${
-              activeTab === 'audit'
-                ? 'bg-purple-600 text-white shadow-lg shadow-purple-600/20'
-                : 'bg-purple-50 text-purple-700 border border-purple-200 hover:bg-purple-100'
-            }`}
-          >
-            <ShieldCheck className="w-4 h-4 text-purple-500" />
-            <span>Audit Activity Logs</span>
-          </button>
+          {hasPerm('admins') && (
+            <>
+              <button
+                onClick={() => setActiveTab('audit')}
+                className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold transition-all ${
+                  activeTab === 'audit'
+                    ? 'bg-purple-600 text-white shadow-lg shadow-purple-600/20'
+                    : 'bg-purple-50 text-purple-700 border border-purple-200 hover:bg-purple-100'
+                }`}
+              >
+                <ShieldCheck className="w-4 h-4 text-purple-500" />
+                <span>Audit Activity Logs</span>
+              </button>
 
-          <button
-            onClick={() => setActiveTab('admins')}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold transition-all ${
-              activeTab === 'admins'
-                ? 'bg-cyan-600 text-white shadow-lg shadow-cyan-600/20'
-                : 'bg-cyan-50 text-cyan-700 border border-cyan-200 hover:bg-cyan-100'
-            }`}
-          >
-            <Users className="w-4 h-4 text-cyan-600" />
-            <span>Admin Users & Permissions ({adminList.length})</span>
-          </button>
+              <button
+                onClick={() => setActiveTab('admins')}
+                className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold transition-all ${
+                  activeTab === 'admins'
+                    ? 'bg-cyan-600 text-white shadow-lg shadow-cyan-600/20'
+                    : 'bg-cyan-50 text-cyan-700 border border-cyan-200 hover:bg-cyan-100'
+                }`}
+              >
+                <Users className="w-4 h-4 text-cyan-600" />
+                <span>Admin Users & Permissions ({adminList.length})</span>
+              </button>
+            </>
+          )}
 
-          <button
-            onClick={() => setActiveTab('pricing')}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold transition-all ${
-              activeTab === 'pricing'
-                ? 'bg-[#0067FF] text-white shadow-lg shadow-[#0067FF]/20'
-                : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
-            }`}
-          >
-            <DollarSign className="w-4 h-4" />
-            <span>Pricing & Fee</span>
-          </button>
+          {hasPerm('pricing') && (
+            <button
+              onClick={() => setActiveTab('pricing')}
+              className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold transition-all ${
+                activeTab === 'pricing'
+                  ? 'bg-[#0067FF] text-white shadow-lg shadow-[#0067FF]/20'
+                  : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
+              }`}
+            >
+              <DollarSign className="w-4 h-4" />
+              <span>Pricing & Fee</span>
+            </button>
+          )}
 
-          <button
-            onClick={() => setActiveTab('urgency')}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold transition-all ${
-              activeTab === 'urgency'
-                ? 'bg-[#0067FF] text-white shadow-lg shadow-[#0067FF]/20'
-                : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
-            }`}
-          >
-            <Clock className="w-4 h-4 text-amber-400" />
-            <span>Batch & Urgency</span>
-          </button>
+          {hasPerm('content') && (
+            <>
+              <button
+                onClick={() => setActiveTab('urgency')}
+                className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold transition-all ${
+                  activeTab === 'urgency'
+                    ? 'bg-[#0067FF] text-white shadow-lg shadow-[#0067FF]/20'
+                    : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
+                }`}
+              >
+                <Clock className="w-4 h-4 text-amber-400" />
+                <span>Batch & Urgency</span>
+              </button>
 
-          <button
-            onClick={() => setActiveTab('announcement')}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold transition-all ${
-              activeTab === 'announcement'
-                ? 'bg-[#0067FF] text-white shadow-lg shadow-[#0067FF]/20'
-                : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
-            }`}
-          >
-            <Megaphone className="w-4 h-4 text-pink-500" />
-            <span>Top Banner Bar</span>
-          </button>
+              <button
+                onClick={() => setActiveTab('announcement')}
+                className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold transition-all ${
+                  activeTab === 'announcement'
+                    ? 'bg-[#0067FF] text-white shadow-lg shadow-[#0067FF]/20'
+                    : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
+                }`}
+              >
+                <Megaphone className="w-4 h-4 text-pink-500" />
+                <span>Top Banner Bar</span>
+              </button>
 
-          <button
-            onClick={() => setActiveTab('popup')}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold transition-all ${
-              activeTab === 'popup'
-                ? 'bg-[#0067FF] text-white shadow-lg shadow-[#0067FF]/20'
-                : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
-            }`}
-          >
-            <Video className="w-4 h-4 text-purple-500" />
-            <span>Webinar Popup Modal</span>
-          </button>
+              <button
+                onClick={() => setActiveTab('popup')}
+                className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold transition-all ${
+                  activeTab === 'popup'
+                    ? 'bg-[#0067FF] text-white shadow-lg shadow-[#0067FF]/20'
+                    : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
+                }`}
+              >
+                <Video className="w-4 h-4 text-purple-500" />
+                <span>Webinar Popup Modal</span>
+              </button>
 
-          <button
-            onClick={() => setActiveTab('partners')}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold transition-all ${
-              activeTab === 'partners'
-                ? 'bg-[#0067FF] text-white shadow-lg shadow-[#0067FF]/20'
-                : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
-            }`}
-          >
-            <Building2 className="w-4 h-4 text-emerald-500" />
-            <span>Hiring Partners</span>
-          </button>
+              <button
+                onClick={() => setActiveTab('partners')}
+                className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold transition-all ${
+                  activeTab === 'partners'
+                    ? 'bg-[#0067FF] text-white shadow-lg shadow-[#0067FF]/20'
+                    : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
+                }`}
+              >
+                <Building2 className="w-4 h-4 text-emerald-500" />
+                <span>Hiring Partners</span>
+              </button>
 
-          <button
-            onClick={() => setActiveTab('faqs')}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold transition-all ${
-              activeTab === 'faqs'
-                ? 'bg-[#0067FF] text-white shadow-lg shadow-[#0067FF]/20'
-                : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
-            }`}
-          >
-            <HelpCircle className="w-4 h-4 text-indigo-500" />
-            <span>Manage FAQs</span>
-          </button>
+              <button
+                onClick={() => setActiveTab('faqs')}
+                className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold transition-all ${
+                  activeTab === 'faqs'
+                    ? 'bg-[#0067FF] text-white shadow-lg shadow-[#0067FF]/20'
+                    : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
+                }`}
+              >
+                <HelpCircle className="w-4 h-4 text-indigo-500" />
+                <span>Manage FAQs</span>
+              </button>
 
-          <button
-            onClick={() => setActiveTab('testimonials')}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold transition-all ${
-              activeTab === 'testimonials'
-                ? 'bg-[#0067FF] text-white shadow-lg shadow-[#0067FF]/20'
-                : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
-            }`}
-          >
-            <Star className="w-4 h-4 text-amber-500" />
-            <span>Testimonials</span>
-          </button>
+              <button
+                onClick={() => setActiveTab('testimonials')}
+                className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold transition-all ${
+                  activeTab === 'testimonials'
+                    ? 'bg-[#0067FF] text-white shadow-lg shadow-[#0067FF]/20'
+                    : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
+                }`}
+              >
+                <Star className="w-4 h-4 text-amber-500" />
+                <span>Testimonials</span>
+              </button>
 
-          <button
-            onClick={() => setActiveTab('contact')}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold transition-all ${
-              activeTab === 'contact'
-                ? 'bg-[#0067FF] text-white shadow-lg shadow-[#0067FF]/20'
-                : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
-            }`}
-          >
-            <Phone className="w-4 h-4 text-teal-500" />
-            <span>WhatsApp & Email</span>
-          </button>
+              <button
+                onClick={() => setActiveTab('contact')}
+                className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold transition-all ${
+                  activeTab === 'contact'
+                    ? 'bg-[#0067FF] text-white shadow-lg shadow-[#0067FF]/20'
+                    : 'bg-white text-[#4B5563] border border-[#E5E7EB] hover:bg-[#F9FAFB]'
+                }`}
+              >
+                <Phone className="w-4 h-4 text-teal-500" />
+                <span>WhatsApp & Email</span>
+              </button>
 
-          <button
-            onClick={() => setActiveTab('founder')}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold transition-all ${
-              activeTab === 'founder'
-                ? 'bg-[#0067FF] text-white shadow-lg shadow-[#0067FF]/20'
-                : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
-            }`}
-          >
-            <User className="w-4 h-4" />
-            <span>Leadership Bio</span>
-          </button>
+              <button
+                onClick={() => setActiveTab('founder')}
+                className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold transition-all ${
+                  activeTab === 'founder'
+                    ? 'bg-[#0067FF] text-white shadow-lg shadow-[#0067FF]/20'
+                    : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
+                }`}
+              >
+                <User className="w-4 h-4" />
+                <span>Leadership Bio</span>
+              </button>
 
-          <button
-            onClick={() => setActiveTab('security')}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold transition-all ${
-              activeTab === 'security'
-                ? 'bg-[#0067FF] text-white shadow-lg shadow-[#0067FF]/20'
-                : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
-            }`}
-          >
-            <KeyRound className="w-4 h-4 text-rose-500" />
-            <span>Passcode Security</span>
-          </button>
+              <button
+                onClick={() => setActiveTab('security')}
+                className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold transition-all ${
+                  activeTab === 'security'
+                    ? 'bg-[#0067FF] text-white shadow-lg shadow-[#0067FF]/20'
+                    : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
+                }`}
+              >
+                <KeyRound className="w-4 h-4 text-rose-500" />
+                <span>Passcode Security</span>
+              </button>
+            </>
+          )}
 
-          <button
-            onClick={() => setActiveTab('leads')}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold transition-all ${
-              activeTab === 'leads'
-                ? 'bg-[#0067FF] text-white shadow-lg shadow-[#0067FF]/20'
-                : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
-            }`}
-          >
-            <Download className="w-4 h-4 text-blue-400" />
-            <span>Brochure Leads ({leads.length})</span>
-          </button>
+          {hasPerm('leads') && (
+            <button
+              onClick={() => setActiveTab('leads')}
+              className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold transition-all ${
+                activeTab === 'leads'
+                  ? 'bg-[#0067FF] text-white shadow-lg shadow-[#0067FF]/20'
+                  : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
+              }`}
+            >
+              <FileSpreadsheet className="w-4 h-4 text-emerald-600" />
+              <span>Brochure Leads ({leads.length})</span>
+            </button>
+          )}
         </div>
 
         {/* Tab 0: Real-Time Traffic & Live Watchers (ADMIN ONLY) */}
@@ -1063,29 +1090,41 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                           {user.passcode}
                         </td>
                         <td className="px-4 py-3">
-                          <div className="flex flex-wrap gap-1">
-                            {ALL_PERMISSIONS.map((p) => {
-                              const hasPerm = user.permissions?.includes(p.key);
-                              return (
-                                <button
-                                  key={p.key}
-                                  type="button"
-                                  onClick={() => handleTogglePermission(user.username, p.key)}
-                                  title={`Click to ${hasPerm ? 'revoke' : 'grant'} ${p.label} permission`}
-                                  className={`px-2 py-0.5 rounded font-mono text-[10px] font-bold border transition-all ${
-                                    hasPerm
-                                      ? 'bg-cyan-100 text-cyan-800 border-cyan-300 hover:bg-cyan-200'
-                                      : 'bg-slate-100 text-slate-400 border-slate-200 hover:bg-slate-200'
-                                  }`}
-                                >
-                                  {hasPerm ? '✓ ' : '+ '}{p.label}
-                                </button>
-                              );
-                            })}
+                          <div className="flex flex-col gap-2">
+                            <div className="flex flex-wrap gap-1">
+                              {ALL_PERMISSIONS.map((p) => {
+                                const isPermGranted = user.permissions?.includes(p.key);
+                                return (
+                                  <button
+                                    key={p.key}
+                                    type="button"
+                                    onClick={() => handleTogglePermission(user.username, p.key)}
+                                    title={`Click to ${isPermGranted ? 'revoke' : 'grant'} ${p.label} permission`}
+                                    className={`px-2.5 py-1 rounded-lg font-mono text-[10px] font-bold border transition-all ${
+                                      isPermGranted
+                                        ? 'bg-emerald-100 text-emerald-900 border-emerald-300 hover:bg-emerald-200'
+                                        : 'bg-slate-100 text-slate-400 border-slate-200 hover:bg-slate-200 opacity-60'
+                                    }`}
+                                  >
+                                    {isPermGranted ? '✓ ' : '+ '}{p.label}
+                                  </button>
+                                );
+                              })}
+                            </div>
+                            <div>
+                              <button
+                                type="button"
+                                onClick={() => handleSaveUserPermissions(user.username, user.permissions)}
+                                className="inline-flex items-center gap-1 px-3 py-1 text-[11px] font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg transition-all shadow-sm active:scale-95"
+                              >
+                                <Save className="w-3.5 h-3.5" />
+                                <span>Save Permissions for @{user.username}</span>
+                              </button>
+                            </div>
                           </div>
                         </td>
                         <td className="px-4 py-3 text-right">
-                          {user.username !== 'mandar' && user.username !== currentAdmin.username ? (
+                          {user.username.toLowerCase() !== 'mandar' && user.username.toLowerCase() !== currentAdmin.username.toLowerCase() ? (
                             <button
                               onClick={() => handleDeleteAdminAccount(user.username)}
                               className="p-1.5 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
