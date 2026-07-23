@@ -1,12 +1,20 @@
 import React, { useState } from 'react';
-import { Building2, Sparkles, TrendingUp, CheckCircle2 } from 'lucide-react';
+import { Building2 } from 'lucide-react';
+import tcsImg from '../assets/companies/TCS.jpg';
+import infosysImg from '../assets/companies/INFOSYS.jpg';
+import wiproImg from '../assets/companies/WIPRO.jpg';
+import accentureImg from '../assets/companies/ACCENTURE.jpg';
+import cognizantImg from '../assets/companies/COGNIZANT.jpg';
+import capgeminiImg from '../assets/companies/CAPGEMINI.jpg';
+import ibmImg from '../assets/companies/IBM.jpg';
+import startechImg from '../assets/companies/STARTECH.jpg';
 
 interface CompanyLogo {
   name: string;
-  slug: string;
+  imgSrc: string;
+  fallbackSrc: string;
   avgPackage: string;
   hike: string;
-  svg: React.ReactNode;
 }
 
 export const HiringPartners: React.FC = () => {
@@ -15,99 +23,59 @@ export const HiringPartners: React.FC = () => {
   const companies: CompanyLogo[] = [
     {
       name: 'TCS',
-      slug: 'tcs',
+      imgSrc: tcsImg,
+      fallbackSrc: '/companies/TCS.jpg',
       avgPackage: '₹6.5 - ₹8.0 LPA',
-      hike: '+65% Hike',
-      svg: (
-        <svg viewBox="0 0 120 40" className="h-8 w-auto fill-current">
-          <path d="M10 8h24v6H25v18h-6V14H10V8zm28 0h18v6h-12v4h10v6H44v4h12v6H38V8zm22 0h18c3.3 0 6 2.7 6 6v4c0 3.3-2.7 6-6 6h-12v8h-6V8zm6 6v4h12v-4H66z" fill="#0067FF" />
-          <text x="92" y="27" fontFamily="'Outfit', sans-serif" fontWeight="800" fontSize="16" fill="#0F172A">TCS</text>
-        </svg>
-      )
+      hike: '+65% Hike'
     },
     {
       name: 'Infosys',
-      slug: 'infosys',
+      imgSrc: infosysImg,
+      fallbackSrc: '/companies/INFOSYS.jpg',
       avgPackage: '₹7.0 - ₹9.5 LPA',
-      hike: '+70% Hike',
-      svg: (
-        <svg viewBox="0 0 140 40" className="h-8 w-auto">
-          <text x="5" y="28" fontFamily="'Outfit', sans-serif" fontStyle="italic" fontWeight="800" fontSize="24" fill="#0067FF">Infosys</text>
-          <circle cx="125" cy="24" r="4" fill="#0067FF" />
-        </svg>
-      )
+      hike: '+70% Hike'
     },
     {
       name: 'Wipro',
-      slug: 'wipro',
+      imgSrc: wiproImg,
+      fallbackSrc: '/companies/WIPRO.jpg',
       avgPackage: '₹6.8 - ₹8.5 LPA',
-      hike: '+68% Hike',
-      svg: (
-        <svg viewBox="0 0 130 40" className="h-8 w-auto">
-          <circle cx="16" cy="20" r="10" fill="none" stroke="#0067FF" strokeWidth="4" />
-          <circle cx="16" cy="20" r="4" fill="#4F46E5" />
-          <text x="36" y="28" fontFamily="'Outfit', sans-serif" fontWeight="800" fontSize="22" fill="#0F172A">wipro</text>
-        </svg>
-      )
+      hike: '+68% Hike'
     },
     {
       name: 'Accenture',
-      slug: 'accenture',
+      imgSrc: accentureImg,
+      fallbackSrc: '/companies/ACCENTURE.jpg',
       avgPackage: '₹8.0 - ₹11.0 LPA',
-      hike: '+75% Hike',
-      svg: (
-        <svg viewBox="0 0 160 40" className="h-8 w-auto">
-          <path d="M12 10 l8 8 l-8 8" fill="none" stroke="#A100FF" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
-          <text x="28" y="28" fontFamily="'Outfit', sans-serif" fontWeight="800" fontSize="20" fill="#0F172A">accenture</text>
-        </svg>
-      )
+      hike: '+75% Hike'
     },
     {
       name: 'Cognizant',
-      slug: 'cognizant',
+      imgSrc: cognizantImg,
+      fallbackSrc: '/companies/COGNIZANT.jpg',
       avgPackage: '₹7.2 - ₹9.8 LPA',
-      hike: '+72% Hike',
-      svg: (
-        <svg viewBox="0 0 160 40" className="h-8 w-auto">
-          <circle cx="16" cy="20" r="10" fill="none" stroke="#0033A0" strokeWidth="4" />
-          <text x="34" y="28" fontFamily="'Outfit', sans-serif" fontWeight="800" fontSize="20" fill="#0F172A">Cognizant</text>
-        </svg>
-      )
+      hike: '+72% Hike'
     },
     {
       name: 'Capgemini',
-      slug: 'capgemini',
+      imgSrc: capgeminiImg,
+      fallbackSrc: '/companies/CAPGEMINI.jpg',
       avgPackage: '₹7.5 - ₹10.2 LPA',
-      hike: '+74% Hike',
-      svg: (
-        <svg viewBox="0 0 160 40" className="h-8 w-auto">
-          <path d="M14 12 C14 12, 22 8, 22 20 C22 28, 14 28, 14 28" fill="none" stroke="#0070AD" strokeWidth="4" strokeLinecap="round" />
-          <text x="32" y="28" fontFamily="'Outfit', sans-serif" fontWeight="800" fontSize="20" fill="#0F172A">Capgemini</text>
-        </svg>
-      )
+      hike: '+75% Hike'
     },
     {
       name: 'IBM',
-      slug: 'ibm',
+      imgSrc: ibmImg,
+      fallbackSrc: '/companies/IBM.jpg',
       avgPackage: '₹8.5 - ₹12.0 LPA',
-      hike: '+80% Hike',
-      svg: (
-        <svg viewBox="0 0 110 40" className="h-8 w-auto">
-          <text x="5" y="30" fontFamily="'JetBrains Mono', monospace" fontWeight="900" fontSize="28" fill="#054ADA" letterSpacing="2">IBM</text>
-        </svg>
-      )
+      hike: '+80% Hike'
     },
     {
       name: 'StartTech',
-      slug: 'starttech',
+      imgSrc: startechImg,
+      fallbackSrc: '/companies/STARTECH.jpg',
       avgPackage: '₹7.0 - ₹9.0 LPA',
-      hike: '+70% Hike',
-      svg: (
-        <svg viewBox="0 0 150 40" className="h-8 w-auto">
-          <polygon points="16,8 20,16 28,16 22,22 24,30 16,24 8,30 10,22 4,16 12,16" fill="#0067FF" />
-          <text x="36" y="28" fontFamily="'Outfit', sans-serif" fontWeight="800" fontSize="20" fill="#0F172A">StartTech</text>
-        </svg>
-      )
+      hike: '+70% Hike'
     }
   ];
 
@@ -130,15 +98,22 @@ export const HiringPartners: React.FC = () => {
                 key={idx}
                 onMouseEnter={() => setHoveredIdx(idx)}
                 onMouseLeave={() => setHoveredIdx(null)}
-                className={`relative p-4 rounded-2xl bg-[#FAFAFC] border transition-all duration-300 flex flex-col items-center justify-center min-h-[90px] cursor-pointer group ${
+                className={`relative p-3 rounded-2xl bg-white border transition-all duration-300 flex flex-col items-center justify-center min-h-[90px] cursor-pointer group ${
                   isHovered
-                    ? 'bg-white border-[#0067FF] shadow-xl shadow-[#0067FF]/15 scale-105 ring-1 ring-[#0067FF]'
+                    ? 'border-[#0067FF] shadow-xl shadow-[#0067FF]/15 scale-105 ring-1 ring-[#0067FF]'
                     : 'border-slate-200/80 hover:border-slate-300'
                 }`}
               >
-                {/* SVG Company Logo */}
-                <div className="transition-transform duration-300 group-hover:scale-105">
-                  {company.svg}
+                {/* Official High-Resolution Logo Image */}
+                <div className="w-full h-12 flex items-center justify-center p-1 transition-transform duration-300 group-hover:scale-105">
+                  <img
+                    src={company.imgSrc}
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = company.fallbackSrc;
+                    }}
+                    alt={`${company.name} Logo`}
+                    className="max-h-10 max-w-full object-contain filter contrast-125 transition-all"
+                  />
                 </div>
 
                 {/* Interactive Tooltip Card on Hover */}
