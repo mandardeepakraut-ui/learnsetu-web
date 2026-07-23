@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { HelpCircle, ChevronDown } from 'lucide-react';
+import { useSettings } from '../context/SettingsContext';
 
 export const FaqSection: React.FC = () => {
+  const { settings } = useSettings();
   const [openIdx, setOpenIdx] = useState<number | null>(0);
 
-  const faqs = [
+  const defaultFaqs = [
     {
       q: "What is the total fee for the Master Program in Data Science & AI?",
       a: "The complete program fee is ₹14,999 with no hidden charges. We also offer 12-Month No-Cost EMI options starting at just ₹1,250/month."
@@ -26,6 +28,16 @@ export const FaqSection: React.FC = () => {
       a: "You get dedicated one-on-one video doubt clearing slots with mentors to resolve project blockers, review code, and conduct 1:1 resume & mock interview reviews."
     }
   ];
+
+  let faqs = defaultFaqs;
+  if (settings.custom_faqs) {
+    try {
+      const parsed = JSON.parse(settings.custom_faqs);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        faqs = parsed;
+      }
+    } catch (e) {}
+  }
 
   return (
     <section id="faq" className="py-20 bg-white border-t border-slate-200/80">

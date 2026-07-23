@@ -21,10 +21,18 @@ export const Hero: React.FC<HeroProps> = ({ onOpenBrochure, onSelectCourse }) =>
           {/* Left Column: Hero Copy & Main CTAs */}
           <div className="lg:col-span-7 flex flex-col items-start text-left space-y-6">
             
-            {/* Top Eyebrow Badge */}
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#0067FF]/10 border border-[#0067FF]/20 text-[#0067FF] text-xs font-mono font-bold tracking-tight shadow-sm">
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>{settings.batch_status || '24-WEEK MASTER PROGRAM • 1:1 MENTORSHIP'}</span>
+            {/* Top Eyebrow Badges & Urgency Tag */}
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#0067FF]/10 border border-[#0067FF]/20 text-[#0067FF] text-xs font-mono font-bold tracking-tight shadow-sm">
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>{settings.batch_name || 'BATCH #2026-A'} • {settings.batch_status || 'LIVE SESSIONS'}</span>
+              </div>
+              {settings.seats_remaining && (
+                <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-rose-50 border border-rose-200 text-rose-700 text-xs font-mono font-bold animate-pulse">
+                  <span className="w-2 h-2 rounded-full bg-rose-600" />
+                  <span>{settings.seats_remaining}</span>
+                </div>
+              )}
             </div>
 
             {/* Hero Title Header */}

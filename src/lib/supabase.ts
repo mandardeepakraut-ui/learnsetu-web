@@ -15,6 +15,19 @@ export interface SiteSettings {
   founder_title: string;
   founder_quote: string;
   batch_status: string;
+  batch_name?: string;
+  batch_start_date?: string;
+  seats_remaining?: string;
+  countdown_enabled?: boolean;
+  countdown_target?: string;
+  announcement_active?: boolean;
+  announcement_text?: string;
+  announcement_button_text?: string;
+  announcement_button_url?: string;
+  announcement_theme?: string;
+  brochure_pdf_url?: string;
+  custom_faqs?: string;
+  custom_testimonials?: string;
   updated_at?: string;
 }
 

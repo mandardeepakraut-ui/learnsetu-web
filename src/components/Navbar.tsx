@@ -1,16 +1,48 @@
 import React, { useState } from 'react';
-import { MessageCircle, FileText, Menu, X } from 'lucide-react';
+import { MessageCircle, FileText, Menu, X, Sparkles, ArrowRight } from 'lucide-react';
 import { LearnSetuLogo } from './LearnSetuLogo';
+import { useSettings } from '../context/SettingsContext';
 
 interface NavbarProps {
   onOpenBrochure: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({ onOpenBrochure }) => {
+  const { settings } = useSettings();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
+  const getThemeClass = (theme?: string) => {
+    switch (theme) {
+      case 'emerald': return 'bg-emerald-600 text-white';
+      case 'violet': return 'bg-purple-600 text-white';
+      case 'amber': return 'bg-amber-500 text-slate-900';
+      case 'blue':
+      default: return 'bg-[#0067FF] text-white';
+    }
+  };
+
   return (
-    <header className="sticky top-0 z-50 w-full glass-panel border-b border-slate-200/80 bg-white/95 backdrop-blur-xl">
+    <div className="sticky top-0 z-50 w-full">
+      {/* Top Announcement Banner */}
+      {settings.announcement_active && (
+        <div className={`py-2 px-4 text-xs font-bold text-center flex items-center justify-center gap-3 transition-all ${getThemeClass(settings.announcement_theme)}`}>
+          <div className="flex items-center gap-2">
+            <Sparkles className="w-3.5 h-3.5 animate-pulse" />
+            <span>{settings.announcement_text || '⚡ Early Bird Offer Active!'}</span>
+          </div>
+          {settings.announcement_button_text && (
+            <a
+              href={settings.announcement_button_url || '#master-course'}
+              className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-white/20 hover:bg-white/30 text-current text-[11px] font-extrabold uppercase transition-all backdrop-blur-sm"
+            >
+              <span>{settings.announcement_button_text}</span>
+              <ArrowRight className="w-3 h-3" />
+            </a>
+          )}
+        </div>
+      )}
+
+      <header className="w-full glass-panel border-b border-slate-200/80 bg-white/95 backdrop-blur-xl">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-22 flex items-center justify-between py-2">
 
         {/* Interactive Official Brand Logo */}
@@ -112,5 +144,6 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenBrochure }) => {
         </div>
       )}
     </header>
+    </div>
   );
 };

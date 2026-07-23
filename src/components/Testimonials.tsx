@@ -1,8 +1,11 @@
 import React from 'react';
 import { Star, Quote, Building2, TrendingUp } from 'lucide-react';
+import { useSettings } from '../context/SettingsContext';
 
 export const Testimonials: React.FC = () => {
-  const reviews = [
+  const { settings } = useSettings();
+
+  const defaultReviews = [
     {
       name: "Riya Sharma",
       role: "Data Analyst @ TCS",
@@ -25,6 +28,16 @@ export const Testimonials: React.FC = () => {
       stars: 5,
     }
   ];
+
+  let reviews = defaultReviews;
+  if (settings.custom_testimonials) {
+    try {
+      const parsed = JSON.parse(settings.custom_testimonials);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        reviews = parsed;
+      }
+    } catch (e) {}
+  }
 
   return (
     <section id="testimonials" className="py-20 relative bg-[#FAFAFC] border-t border-slate-200/80">
