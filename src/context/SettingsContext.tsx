@@ -3,7 +3,7 @@ import { supabase, SiteSettings } from '../lib/supabase';
 
 const defaultSettings: SiteSettings = {
   course_fee: '₹14,999',
-  emi_monthly: '₹1,250/mo',
+  emi_monthly: '₹1,250/month',
   whatsapp_number: '918591928362',
   support_email: 'mandarra71@gmail.com',
   founder_name: 'Sagar Parmar',

@@ -137,7 +137,7 @@ export const InteractiveCalculator3D: React.FC<InteractiveCalculator3DProps> = (
                   <div className="text-[11px] text-slate-500">12 Month No Cost EMI Option</div>
                 </div>
                 <div className="text-right">
-                  <div className="text-xl font-extrabold font-mono text-[#0067FF]">{currentLevel.emi}/mo</div>
+                  <div className="text-xl font-extrabold font-mono text-[#0067FF]">{currentLevel.emi}</div>
                   <div className="text-[10px] text-emerald-600 font-bold">Zero Interest</div>
                 </div>
               </div>
